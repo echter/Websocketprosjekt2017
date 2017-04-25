@@ -7,4 +7,6 @@ public interface Connection {
     void onError();
     void onClose();
     void onMessage();
+    int getPort();
+    byte[] getInternetAddress();
 }

@@ -1,4 +1,4 @@
-package no.ntnu.stud.websocket.server.interfaces.functional;
+package no.ntnu.stud.websocket.server.interfaces.functionalinterfaces;
 
 /**
  * Created by EliasBrattli on 25/04/2017.
