@@ -16,9 +16,5 @@ public class SocketServer implements Server {
     public void onConnection(Connection connection, ActionListener actionListener){
         actionListener.onAction();
     }
-    @Override
-    public void close(ActionListener actionListener){
-        actionListener.onAction();
-    }
 
 }

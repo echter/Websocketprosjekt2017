@@ -7,8 +7,5 @@ import no.ntnu.stud.websocket.server.interfaces.functionalinterfaces.ActionListe
  */
 public interface Server {
     void onConnection(Connection connection, ActionListener actionListener);
-    void onOpen(ActionListener actionListener);
-    void onError(ActionListener actionListener);
 
-    void close(ActionListener actionListener);
 }

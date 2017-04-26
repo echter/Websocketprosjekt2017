@@ -32,10 +32,7 @@
         <servlet-name>jersey-template</servlet-name>
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer
         </servlet-class>
-        <init-param>
-            <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>org.glassfish.jersey.filter;com.CardiacArray.templateService</param-value>
-        </init-param>
+
     </servlet>
     <servlet-mapping>
         <servlet-name>jersey-template</servlet-name>
