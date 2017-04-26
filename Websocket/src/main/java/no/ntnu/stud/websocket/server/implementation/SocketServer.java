@@ -2,7 +2,7 @@ package no.ntnu.stud.websocket.server.implementation;
 
 import no.ntnu.stud.websocket.server.interfaces.Connection;
 import no.ntnu.stud.websocket.server.interfaces.Server;
-import no.ntnu.stud.websocket.server.interfaces.functionalinterfaces.ConnectionListener;
+import no.ntnu.stud.websocket.server.interfaces.functionalinterfaces.ActionListener;
 
 
 /**
@@ -13,12 +13,12 @@ public class SocketServer implements Server {
 
     }
     @Override
-    public void onConnection(Connection connection, ConnectionListener connectionListener){
-        connectionListener.onAction();
+    public void onConnection(Connection connection, ActionListener actionListener){
+        actionListener.onAction();
     }
     @Override
-    public void close(){
-
+    public void close(ActionListener actionListener){
+        actionListener.onAction();
     }
 
 }
