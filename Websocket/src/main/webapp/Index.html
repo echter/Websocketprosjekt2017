@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Websocket Client</title>
+</head>
+<body>
+
+<script>
+    var socket = new WebSocket("ws://localhost:1234");
+    socket.onopen = function (event) {
+        socket.send("Hello websocket world?");
+    };
+    socket.onmessage = function (event) {
+        console.log(event.data);
+    }
+</script>
+
+</body>
+</html>
