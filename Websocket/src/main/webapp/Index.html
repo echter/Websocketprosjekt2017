@@ -1,19 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE HTML>
+<html>
 <head>
-    <title>Websocket Client</title>
+    <script type="text/javascript">
+        var ws = new WebSocket("ws://localhost:80")
+        console.log(ws)
+        ws.onerror = function (error) {
+            document.body.innerHTML = "Error occured:"
+            console.log(error)
+        }
+        ws.onopen = function () {
+            document.body.innerHTML = "Connection open!"
+            ws.send("Dette er en melding")
+        }
+        ws.onmessage = function (message) {
+            document.body.innerHTML = "Message recieved:\n"+ message.data
+            console.log(message)
+        }
+        ws.onclose = function (message) {
+            document.body.innerHTML = "Connection closed:\n"+message
+            console.log(message)
+        }
+
+    </script>
 </head>
 <body>
-
-<script>
-    var socket = new WebSocket("ws://localhost:1234");
-    socket.onopen = function (event) {
-        socket.send("Hello websocket world?");
-    };
-    socket.onmessage = function (event) {
-        console.log(event.data);
-    }
-</script>
-
 </body>
 </html>
