@@ -10,7 +10,7 @@ class TCPServer {
         ServerSocket welcomeSocket = new ServerSocket(80);
 
         while(true) {
-            Socket connectionSocket = welcomeSocket.accept();
+            java.net.Socket connectionSocket = welcomeSocket.accept();
             System.out.println("incoming");
             BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
             DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
