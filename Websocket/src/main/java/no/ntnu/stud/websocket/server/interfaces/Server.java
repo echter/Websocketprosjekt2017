@@ -1,11 +1,11 @@
 package no.ntnu.stud.websocket.server.interfaces;
 
-import no.ntnu.stud.websocket.server.interfaces.functionalinterfaces.Listener;
+import no.ntnu.stud.websocket.server.interfaces.functionalinterfaces.ConnectionListener;
 
 /**
  * Created by EliasBrattli on 25/04/2017.
  */
 public interface Server {
-    void onConnection(Connection connection, Listener listener);
+    void onConnection(Connection connection, ConnectionListener connectionListener);
     void close();
 }
