@@ -34,7 +34,7 @@ class TCPServer {
 
                 String possibleMatch = leseren.readLine();
                 System.out.println(possibleMatch);
-                if (possibleMatch.contains("Sec-WebSocket-Key:")) {
+                if (possibleMatch.contains("Sec-Websocket-Key:")) {
 
                     String[] matches = possibleMatch.split(" ");
                     System.out.println(matches[1]);
@@ -45,7 +45,7 @@ class TCPServer {
                     String responsHeader = "HTTP/1.1 101 Switching Protocols\n";
                     String responsUpgrade = "Upgrade: websocket\n";
                     String responsConnection = "Connection: Upgrade\n";
-                    String responsKey = "Sec-WebSocket-Accept: " + acceptKey + "\r\n";
+                    String responsKey = "Sec-Websocket-Accept: " + acceptKey + "\r\n";
                     String respons = responsHeader + responsUpgrade + responsConnection + responsKey;
                     skriveren.println(respons);
                     System.out.println("success?");
@@ -100,7 +100,7 @@ class KeyGeneration {
 
     /**
      * Given a web socket key,
-     *  ex: Sec-WebSocket-Key: wZp7uNNUBt0NPRqs/sdkvQ==
+     *  ex: Sec-Websocket-Key: wZp7uNNUBt0NPRqs/sdkvQ==
      *  Generate our accept key
      */
     public static String getKey(String strWebSocketKey) throws
