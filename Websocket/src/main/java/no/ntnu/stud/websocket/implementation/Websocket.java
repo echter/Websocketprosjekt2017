@@ -90,7 +90,15 @@ public class WebSocket implements Runnable{
             }
         }
     }
+    public void close(){
 
+    }
+    public void ping(){
+
+    }
+    public void pong(){
+
+    }
     @Override
     public void run(){
         try {
