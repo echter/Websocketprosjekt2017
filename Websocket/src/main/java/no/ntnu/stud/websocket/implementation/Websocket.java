@@ -1,11 +1,15 @@
 package no.ntnu.stud.websocket.implementation;
 
+import no.ntnu.stud.websocket.util.MultiThreadUtil;
+
 import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.helpers.AbstractMarshallerImpl;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -14,12 +18,14 @@ import java.util.regex.Pattern;
 /**
  * Created by Chris on 28.04.2017.
  */
-public class Websocket {
-    private final int PORT;
-    private ServerSocket serverSocket;
+public class WebSocket implements Runnable{
     private Socket socket;
-    public Websocket(int port){
-        PORT = port;
+    private InputStream input;
+    private OutputStream output;
+    public WebSocket(Socket socket)throws IOException{
+        this.socket = socket;
+        input = socket.getInputStream();
+        output = socket.getOutputStream();
     }
     private void compileMessage(InputStream input, OutputStream output)throws IOException,InterruptedException, NoSuchAlgorithmException{
         String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
@@ -45,15 +51,6 @@ public class Websocket {
             output.write(response, 0, response.length);
             System.out.println("Ok...");
         }
-    }
-    public void connect()throws IOException, InterruptedException,NoSuchAlgorithmException{
-        serverSocket = new ServerSocket(PORT);
-        System.out.println("Logg for tjenersiden. Nå venter vi...");
-        socket = serverSocket.accept();
-        InputStream input = socket.getInputStream();
-        OutputStream output = socket.getOutputStream();
-        compileMessage(input,output);
-        decodeMessage(input,output);
     }
     private void decodeMessage(InputStream input,OutputStream output)throws IOException, InterruptedException,NoSuchAlgorithmException{
         while(true){
@@ -85,11 +82,27 @@ public class Websocket {
                     for (int i = 2; i < decoded.length + 2; i++) {
                         firstByte[i] = (byte) decoded[i - 2];
                     }
-                    output.write(firstByte);
+                    for (Socket s: MultiThreadUtil.getSockets()) {
+                        s.getOutputStream().write(firstByte);
+                    }
+
                 }
             }
         }
     }
+
+    @Override
+    public void run(){
+        try {
+            System.out.println("Log to server. Waiting....");
+            compileMessage(input,output);
+            decodeMessage(input,output);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
 }
 
 

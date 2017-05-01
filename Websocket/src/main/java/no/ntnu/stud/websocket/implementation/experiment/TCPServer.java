@@ -1,4 +1,4 @@
-package no.ntnu.stud.websocket.implementation;
+package no.ntnu.stud.websocket.implementation.experiment;
 
 import sun.misc.BASE64Encoder;
 
@@ -45,7 +45,7 @@ class TCPServer {
                     String responsHeader = "HTTP/1.1 101 Switching Protocols\n";
                     String responsUpgrade = "Upgrade: websocket\n";
                     String responsConnection = "Connection: Upgrade\n";
-                    String responsKey = "Sec-Websocket-Accept: " + acceptKey + "\r\n";
+                    String responsKey = "Sec-WebSocket-Accept: " + acceptKey + "\r\n";
                     String respons = responsHeader + responsUpgrade + responsConnection + responsKey;
                     skriveren.println(respons);
                     System.out.println("success?");

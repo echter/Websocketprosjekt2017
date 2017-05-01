@@ -1,4 +1,4 @@
-package no.ntnu.stud.websocket.server.implementation;
+package no.ntnu.stud.websocket.implementation.experiment;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
