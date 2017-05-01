@@ -57,7 +57,8 @@ public class WebSocket implements Runnable{
             // Reads first byte in message
             int currentBit = input.read();
             System.out.println("First bit: " + currentBit);
-            if (currentBit > 100 && currentBit < 200) {
+
+            if (currentBit == 129) {
                 currentBit = input.read();
                 System.out.println("Length bit: " + currentBit);
                 int length = currentBit - 128;
@@ -85,7 +86,6 @@ public class WebSocket implements Runnable{
                     for (Socket s: MultiThreadUtil.getSockets()) {
                         s.getOutputStream().write(firstByte);
                     }
-
                 }
             }
         }
