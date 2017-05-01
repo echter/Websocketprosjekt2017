@@ -6,9 +6,6 @@
 <body>
 <script>
     var exampleSocket = new WebSocket("ws://localhost:2345");
-    socketExtra.onopen = function (event) {
-        exampleSocket.send("extra");
-    };
     exampleSocket.onopen = function (event) {
         exampleSocket.send("abcdef");
     };
