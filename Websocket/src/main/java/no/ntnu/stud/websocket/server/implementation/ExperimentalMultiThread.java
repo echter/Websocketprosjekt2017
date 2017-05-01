@@ -71,6 +71,7 @@ public class ExperimentalMultiThread implements Runnable{
                 int clientMessage = input.read();
                 System.out.println("First bit: " + clientMessage);
 
+                //IF TEXT BYTE?
                 if (clientMessage >= 100 && clientMessage < 200) {
                     clientMessage = input.read();
                     System.out.println("Length bit: " + clientMessage);
@@ -91,7 +92,7 @@ public class ExperimentalMultiThread implements Runnable{
                         }
 
                         byte[] firstByte = new byte[length + 2];
-                        firstByte[0] = (byte) 0b10000001;
+                        firstByte[0] = (byte) 0b10000001; // 10000001 this means the byte value is 129. Meaning text frame because 129-128 = 1 and 1 is the opcode for text frame.
                         firstByte[1] = (byte) decoded.length;
                         for (int i = 2; i < decoded.length + 2; i++) {
                             firstByte[i] = (byte) decoded[i - 2];
