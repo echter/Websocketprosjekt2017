@@ -1,6 +1,6 @@
-package no.ntnu.stud.websocket.server.interfaces;
+package no.ntnu.stud.websocket.interfaces;
 
-import no.ntnu.stud.websocket.server.interfaces.functionalinterfaces.ActionListener;
+import no.ntnu.stud.websocket.interfaces.functionalinterfaces.ActionListener;
 
 /**
  * Created by EliasBrattli on 25/04/2017.
