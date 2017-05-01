@@ -22,7 +22,7 @@ public class Socket implements Connection{
         this.host = host;
     }
     public Socket(int port){
-        
+
     }
     @Override
     public void onOpen(ActionListener listener){
