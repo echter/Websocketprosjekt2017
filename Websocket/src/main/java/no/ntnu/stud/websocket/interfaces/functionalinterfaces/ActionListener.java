@@ -1,4 +1,4 @@
-package no.ntnu.stud.websocket.server.interfaces.functionalinterfaces;
+package no.ntnu.stud.websocket.interfaces.functionalinterfaces;
 
 import java.net.URL;
 

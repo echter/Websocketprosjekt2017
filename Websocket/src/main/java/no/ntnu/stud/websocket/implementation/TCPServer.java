@@ -1,6 +1,5 @@
-package no.ntnu.stud.websocket.server.implementation;
+package no.ntnu.stud.websocket.implementation;
 
-import com.sun.javaws.Globals;
 import sun.misc.BASE64Encoder;
 
 import java.io.*;
@@ -9,8 +8,6 @@ import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Objects;
-
-import static javax.swing.text.html.HTML.Tag.S;
 
 class TCPServer {
     public static void main(String[] args) throws IOException, InterruptedException, NoSuchAlgorithmException {

@@ -1,4 +1,4 @@
-package no.ntnu.stud.websocket.server.http;
+package no.ntnu.stud.websocket.http;
 
 /**
  * Created by EliasBrattli on 25/04/2017.
