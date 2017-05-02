@@ -2,6 +2,7 @@ package no.ntnu.stud.websocket.implementation;
 
 import no.ntnu.stud.websocket.http.Status;
 import no.ntnu.stud.websocket.util.MultiThreadUtil;
+import no.ntnu.stud.websocket.util.OpCode;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
@@ -80,13 +81,12 @@ public class Websocket implements Runnable{
             System.out.println("Ok...");
         }
     }
-    public void onMessage(InputStream input,int len)throws IOException, InterruptedException,NoSuchAlgorithmException{
-        int opcode = 0b10000001;
+    public void onMessage(InputStream input)throws IOException, InterruptedException,NoSuchAlgorithmException{
         while(status != Status.CLOSED){
             // Reads first byte in message
             int currentBit = input.read();
             System.out.println("First bit: " + currentBit);
-            if (currentBit == len) {
+            if (currentBit == OpCode.TEXTMESSAGE.getValue()) {
                 currentBit = input.read();
                 System.out.println("Length bit: " + currentBit);
                 int length = currentBit - 128;
@@ -105,9 +105,9 @@ public class Websocket implements Runnable{
                         System.out.println("OUT: " + decoded[i]);
                     }
 
-                    writeMessage(decoded,length,opcode);
+                    writeMessage(decoded,length, OpCode.TEXTMESSAGE.getValue());
                 }
-            } else if (currentBit == 136){
+            } else if (currentBit == OpCode.CLOSE.getValue()){
                 status = Status.CLOSING;
                 onClose();
             }
@@ -145,10 +145,9 @@ public class Websocket implements Runnable{
     @Override
     public void run(){
         try {
-            int frame = 129;
             System.out.println("Log to server. Waiting....");
             onOpen(input,output);
-            onMessage(input,frame);
+            onMessage(input);
         }catch (Exception e){
             e.printStackTrace();
         }
