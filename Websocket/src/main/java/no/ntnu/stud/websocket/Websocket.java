@@ -52,6 +52,7 @@ public class Websocket implements Runnable{
             output.write(response, 0, response.length);
             status = Status.OPEN;
             System.out.println("Ok...");
+            //onPing("PING");
         }
     }
 
@@ -72,6 +73,18 @@ public class Websocket implements Runnable{
             } else if (currentBit == OpCode.CLOSE.getValue()){
                 status = Status.CLOSING;
                 onClose();
+            } else if (currentBit == OpCode.PONG.getValue()){
+                currentBit = input.read();
+                System.out.println("PONG bit: " + currentBit);
+                int length = currentBit - BIT_ADJUSTMENT;
+                System.out.println(length + " This is the length of the PONG message");
+                if (length > 0){
+                    int[] decoded = decodeMessage(input,length);
+                    onPong(decoded);
+                } else if (length == 0){
+                    onPong();
+                }
+
             }
         }
         System.out.println("Completed");
@@ -98,7 +111,9 @@ public class Websocket implements Runnable{
     }
     private void writeMessage(int[] decoded, int length,int opcode)throws IOException{
         byte[] firstByte = new byte[length + 2];
-        firstByte[0] = (byte) opcode;
+        System.out.println(opcode + " This is the opcode being printed");
+        firstByte[0] = (byte) (opcode - BIT_ADJUSTMENT);
+        System.out.println(firstByte[0] + " ?????????");
         firstByte[1] = (byte) decoded.length;
         for (int i = 2; i < decoded.length+2; i++) {
             firstByte[i] = (byte) decoded[i-2];
@@ -107,6 +122,30 @@ public class Websocket implements Runnable{
             s.getOutputStream().write(firstByte);
         }
     }
+
+    //DONT REMOVE THIS, IT LOOKS THE SAME BUT TAKES BYTE[] INSTEAD OF INT
+    private void writeMessage(byte[] decoded, int length,int opcode)throws IOException{
+        byte[] firstByte = new byte[length + 2];
+        System.out.println(opcode);
+        firstByte[0] = (byte) (opcode - BIT_ADJUSTMENT);
+        System.out.println(firstByte[0] + " check");
+        firstByte[1] = (byte) decoded.length;
+        for (int i = 2; i < decoded.length+2; i++) {
+            firstByte[i] =  decoded[i-2];
+        }
+        for (Socket s: MultiThreadUtil.getSockets()) {
+            s.getOutputStream().write(firstByte);
+        }
+    }
+
+    //FOR EMPTY MESSAGES LIKE PINGPONG
+    private void writeMessage(int opcode)throws IOException{
+        byte[] firstByte = new byte[1];
+        firstByte[0] = (byte) (opcode);
+        System.out.println(firstByte[0] + " THIS IS THE BYTE WE SEND");
+        socket.getOutputStream().write(firstByte);
+    }
+
     public void onClose()throws IOException{
         System.out.println("Closing socket: " + socket);
         if(MultiThreadUtil.removeSocket(socket)){
@@ -114,11 +153,22 @@ public class Websocket implements Runnable{
             status = Status.CLOSED;
         }
     }
-    public void ping(){
-
+    public void onPing(String text) throws IOException {
+        if (text != null) {
+            byte[] bytes = text.getBytes();
+            writeMessage(bytes,bytes.length,OpCode.PING.getValue());
+        } else {
+            System.out.println("PING TEXT CANT BE NULL");
+        }
     }
-    public void pong(){
-
+    public void onPing() throws IOException {
+        writeMessage(OpCode.PING.getValue());
+    }
+    public void onPong() throws IOException {
+        writeMessage(OpCode.PONG.getValue());
+    }
+    public void onPong(int[] decoded) throws IOException {
+        writeMessage(decoded, decoded.length, OpCode.PONG.getValue());
     }
     public Status getStatus(){
         return status;
