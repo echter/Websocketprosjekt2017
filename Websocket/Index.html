@@ -5,9 +5,13 @@
     <!--script src="src/main/webapp/example.Client.js"></script-->
 </head>
 <body>
+<div id="connecting_label">Connecting...</div>
 <script>var ws = new WebSocket("ws://localhost:2345");
 ws.onopen = function (event) {
-    //ws.send("abcdef");
+    document.getElementById("connecting_label").innerHTML = "Connected.";
+};
+ws.onerror = function (event) {
+    document.getElementById("connecting_label").innerHTML = "Not connected.";
 };
 ws.onmessage = function (event) {
     console.log(event.data);
@@ -21,10 +25,12 @@ function sendMessage() {
 }
 function closeButtonFunction() {
     ws.close();
+    document.getElementById("connecting_label").innerHTML = "Not connected.";
 }
 
 document.close(function () {
     ws.close();
+    document.getElementById("connecting_label").innerHTML = "Not connected.";
 })</script>
 <button class="button" id="button" onclick="sendMessage()">Press me</button>
 <button class="close" id="close" onclick="closeButtonFunction()">Close me</button>

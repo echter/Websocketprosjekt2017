@@ -68,9 +68,13 @@ public class Client {
                         "    <!--script src=\"src/main/webapp/example.Client.js\"></script-->\n" +
                         "</head>\n" +
                         "<body>\n" +
+                        "<div id=\"connecting_label\">Connecting...</div>\n" +
                         "<script>var ws = new WebSocket(\"ws://" +getIpv4Address()+ ":"+ serverPortConcat +"\");\n" +
                         "ws.onopen = function (event) {\n" +
-                        "    //ws.send(\"abcdef\");\n" +
+                        "    document.getElementById(\"connecting_label\").innerHTML = \"Connected.\";\n" +
+                        "};\n" +
+                        "ws.onerror = function (event) {\n" +
+                        "document.getElementById(\"connecting_label\").innerHTML = \"Not connected.\";\n" +
                         "};\n" +
                         "ws.onmessage = function (event) {\n" +
                         "    console.log(event.data);\n" +
@@ -84,10 +88,12 @@ public class Client {
                         "}\n" +
                         "function closeButtonFunction() {\n" +
                         "    ws.close();\n" +
+                        "document.getElementById(\"connecting_label\").innerHTML = \"Not connected.\";\n" + 
                         "}\n" +
                         "\n" +
                         "document.close(function () {\n" +
                         "    ws.close();\n" +
+                        "document.getElementById(\"connecting_label\").innerHTML = \"Not connected.\";\n" +
                         "})</script>\n" +
                         "<button class=\"button\" id=\"button\" onclick=\"sendMessage()\">Press me</button>\n" +
                         "<button class=\"close\" id=\"close\" onclick=\"closeButtonFunction()\">Close me</button>\n" +
