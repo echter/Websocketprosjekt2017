@@ -1,15 +1,13 @@
 package no.ntnu.stud.websocket.implementation;
 
+import no.ntnu.stud.websocket.http.Status;
 import no.ntnu.stud.websocket.util.MultiThreadUtil;
 
 import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.helpers.AbstractMarshallerImpl;
 import java.io.*;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,12 +20,14 @@ public class Websocket implements Runnable{
     private Socket socket;
     private InputStream input;
     private OutputStream output;
+    private Status status;
     public Websocket(Socket socket)throws IOException{
         this.socket = socket;
         input = socket.getInputStream();
         output = socket.getOutputStream();
+        status = Status.CONNECTING;
     }
-    private void compileMessage(InputStream input, OutputStream output)throws IOException,InterruptedException, NoSuchAlgorithmException{
+    public void onOpen(InputStream input, OutputStream output)throws IOException,InterruptedException, NoSuchAlgorithmException{
         String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
         System.out.println(dataIn);
         System.out.println("Incoming...");
@@ -49,17 +49,44 @@ public class Websocket implements Runnable{
                     + "\r\n\r\n")
                     .getBytes("UTF-8");
             output.write(response, 0, response.length);
+            status = Status.OPEN;
             System.out.println("Ok...");
         }
     }
-    private void decodeMessage(InputStream input,OutputStream output)throws IOException, InterruptedException,NoSuchAlgorithmException{
-        boolean connection = true;
-        while(connection){
+
+    public void onOpen(String dataIn, OutputStream output)throws IOException,InterruptedException, NoSuchAlgorithmException{
+        //String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
+        System.out.println(dataIn);
+        System.out.println("Incoming...");
+        Matcher get = Pattern.compile("^GET").matcher(dataIn);
+
+        if (get.find()) {
+            Matcher match = Pattern.compile("Sec-WebSocket-Key: (.*)").matcher(dataIn);
+            boolean foundMatch = match.find();
+            byte[] response = ("HTTP/1.1 101 Switching Protocols\r\n"
+                    + "Connection: Upgrade\r\n"
+                    + "Upgrade: websocket\r\n"
+                    + "Sec-Websocket-Accept: "
+                    + DatatypeConverter
+                    .printBase64Binary(
+                            MessageDigest
+                                    .getInstance("SHA-1")
+                                    .digest((match.group(1) + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")
+                                            .getBytes("UTF-8")))
+                    + "\r\n\r\n")
+                    .getBytes("UTF-8");
+            output.write(response, 0, response.length);
+            status = Status.OPEN;
+            System.out.println("Ok...");
+        }
+    }
+    public void onMessage(InputStream input,int len)throws IOException, InterruptedException,NoSuchAlgorithmException{
+        int opcode = 0b10000001;
+        while(status != Status.CLOSED){
             // Reads first byte in message
             int currentBit = input.read();
-            System.out.println("CURRENTBIT: ----------- " + currentBit);
-
-            if (currentBit == 129) {
+            System.out.println("First bit: " + currentBit);
+            if (currentBit == len) {
                 currentBit = input.read();
                 System.out.println("Length bit: " + currentBit);
                 int length = currentBit - 128;
@@ -78,36 +105,33 @@ public class Websocket implements Runnable{
                         System.out.println("OUT: " + decoded[i]);
                     }
 
-                    byte[] firstByte = new byte[length + 2];
-                    firstByte[0] = (byte) 0b10000001;
-                    firstByte[1] = (byte) decoded.length;
-                    for (int i = 2; i < decoded.length + 2; i++) {
-                        firstByte[i] = (byte) decoded[i - 2];
-                    }
-                    for (Socket s : MultiThreadUtil.getSockets()) {
-                        s.getOutputStream().write(firstByte);
-                    }
+                    writeMessage(decoded,length,opcode);
                 }
             } else if (currentBit == 136){
-                System.out.println("Closing socket: " + socket);
-                boolean remove = false;
-                for (Socket s : MultiThreadUtil.getSockets()) {
-                    if (s == socket){
-                        remove = true;
-                    }
-                }
-                socket.close();
-                if (remove) {
-                    MultiThreadUtil.removeSocket(socket);
-                }
-                connection = false;
+                status = Status.CLOSING;
+                onClose();
             }
 
         }
         System.out.println("Completed");
     }
-    public void close(){
-
+    private void writeMessage(int[] decoded, int length,int opcode)throws IOException{
+        byte[] firstByte = new byte[length + 2];
+        firstByte[0] = (byte) opcode;
+        firstByte[1] = (byte) decoded.length;
+        for (int i = 2; i < decoded.length+2; i++) {
+            firstByte[i] = (byte) decoded[i-2];
+        }
+        for (Socket s: MultiThreadUtil.getSockets()) {
+            s.getOutputStream().write(firstByte);
+        }
+    }
+    public void onClose()throws IOException{
+        System.out.println("Closing socket: " + socket);
+        if(MultiThreadUtil.removeSocket(socket)){
+            socket.close();
+            status = Status.CLOSED;
+        }
     }
     public void ping(){
 
@@ -115,12 +139,16 @@ public class Websocket implements Runnable{
     public void pong(){
 
     }
+    public Status getStatus(){
+        return status;
+    }
     @Override
     public void run(){
         try {
+            int frame = 129;
             System.out.println("Log to server. Waiting....");
-            compileMessage(input,output);
-            decodeMessage(input,output);
+            onOpen(input,output);
+            onMessage(input,frame);
         }catch (Exception e){
             e.printStackTrace();
         }
