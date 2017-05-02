@@ -85,8 +85,10 @@ public class Websocket {
             String responseUpgrade = "Upgrade: websocket\n";
             String responseConnection = "Connection: Upgrade\n";
 
-            //This is more or less taken from: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_a_WebSocket_server_in_Java
-            //And is a great way of generating the accept key for the handshake.
+            /**This (The method for finding acceptKey below) is more or less taken from:
+             * https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_a_WebSocket_server_in_Java
+             * And is a great way of generating the accept key for the handshake.
+             */
             String acceptKey = DatatypeConverter.printBase64Binary(MessageDigest.getInstance("SHA-1")
                     .digest((match.group(1) + MAGIC_STRING)
                             .getBytes("UTF-8")));
@@ -154,6 +156,11 @@ public class Websocket {
                         //System.out.println("There was no message in this ping.");
                     }
                 }
+                /**
+                 * The catch gets invoked if the client is no longer sending anything,
+                 * this happens if the client loses internett or similar problems.
+                 * Any other kind of disconnect should be found out by the ping function.
+                 */
             } catch (Exception e){
                 System.out.println("LOST CONNECTION... SOCKET CLOSING...");
                 socket.close();
