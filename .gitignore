@@ -1,7 +1,7 @@
 *.DS_Store
-*.iws
-*.ipr
-*.iml
+*Websocket/.iws
+*Websocket/.ipr
+*Websocket/.iml
 .AppleDouble
 .LSOverride
 
