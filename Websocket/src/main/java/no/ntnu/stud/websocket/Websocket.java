@@ -68,7 +68,11 @@ public class Websocket {
 
 
     /**
-     * @throws IOException Because of InputStreams
+     * The opening handshake between two endpoints
+     * Is intended to be compatible with HTTP-based software so that HTTP clients
+     * and websocket clients may use the same port when commiunicating to a server.
+     * This handshake is an HTTP upgrade request.
+     * IOException Because of InputStreams
      */
     public void onOpen() throws IOException, InterruptedException, NoSuchAlgorithmException {
         String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
@@ -110,20 +114,18 @@ public class Websocket {
 
 
     /**
+     *  Handles messages between endpoints.
+     *  Supports text frames, close frames, pong frames and empty frames.
+     *  
      * @throws IOException The outputsteams may throw exception
      */
     public void onMessage()throws IOException{
 
-
-        //If the connection is closed, this wont run.
         while (status != Status.CLOSED) {
             // Reads first byte in message
-
             try {
                 int currentBit = input.read();
-
-                //System.out.println("First bit: " + currentBit);
-
+                //Normal text message
                 if (currentBit == OpCode.TEXTMESSAGE.getValue()) {
                     currentBit = input.read();
                     System.out.println("Length bit: " + currentBit);
@@ -153,7 +155,6 @@ public class Websocket {
                         for (int i = 0; i < KEY_LEN; i++) {
                             input.read(); //this gets rid of the decryption keys that exist even when there is no message
                         }
-                        //System.out.println("There was no message in this ping.");
                     }
                 }
                 /**
