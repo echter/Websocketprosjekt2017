@@ -14,8 +14,7 @@ ws.onmessage = function (event) {
 }
 
 function sendMessage() {
-    ws.send("close");
-    ws.send("abcdef");
+    ws.send("This is a message");
 }
 function closeButtonFunction() {
     ws.close();
