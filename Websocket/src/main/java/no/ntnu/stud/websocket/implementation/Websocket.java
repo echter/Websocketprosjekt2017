@@ -21,6 +21,10 @@ public class Websocket implements Runnable{
     private InputStream input;
     private OutputStream output;
     private Status status;
+    private final int MESSAGE_OPCODE = 0b10000001;
+    private final int PING_OPCODE = 0x9;
+    private final int PONG_OPCODE = 0xA;
+    private final int KEY_LEN = 4;
     public Websocket(Socket socket)throws IOException{
         this.socket = socket;
         input = socket.getInputStream();
@@ -81,39 +85,42 @@ public class Websocket implements Runnable{
         }
     }
     public void onMessage(InputStream input,int len)throws IOException, InterruptedException,NoSuchAlgorithmException{
-        int opcode = 0b10000001;
         while(status != Status.CLOSED){
             // Reads first byte in message
             int currentBit = input.read();
             System.out.println("First bit: " + currentBit);
             if (currentBit == len) {
-                currentBit = input.read();
-                System.out.println("Length bit: " + currentBit);
-                int length = currentBit - 128;
-                if (length > 0 && length <= 125) {
-                    int[] key = new int[4];
-                    int[] decoded = new int[length];
-                    for (int i = 0; i < 4; i++) {
-                        key[i] = input.read();
-                        System.out.println("KEY: " + key[i]);
-                    }
-                    for (int i = 0; i < length; i++) {
-                        int encoded = input.read();
-                        decoded[i] = (byte) (encoded ^ key[i & 0x3]);
-                    }
-                    for (int i = 0; i < decoded.length; i++) {
-                        System.out.println("OUT: " + decoded[i]);
-                    }
-
-                    writeMessage(decoded,length,opcode);
-                }
-            } else if (currentBit == 136){
+                encodeMessage(input,len);
+            } else if(currentBit == PING_OPCODE);
+            else if (currentBit == 136){
                 status = Status.CLOSING;
                 onClose();
             }
 
         }
         System.out.println("Completed");
+    }
+    private void encodeMessage(InputStream input,int len)throws IOException{
+        int currentBit = input.read();
+        System.out.println("Length bit: " + currentBit);
+        int length = currentBit - 128;
+        if (length > 0 && length <= 125) {
+            int[] key = new int[KEY_LEN];
+            int[] decoded = new int[length];
+            for (int i = 0; i < KEY_LEN; i++) {
+                key[i] = input.read();
+                System.out.println("KEY: " + key[i]);
+            }
+            for (int i = 0; i < length; i++) {
+                int encoded = input.read();
+                decoded[i] = (byte) (encoded ^ key[i & 0x3]);
+            }
+            for (int i = 0; i < decoded.length; i++) {
+                System.out.println("OUT: " + decoded[i]);
+            }
+
+            writeMessage(decoded,length,MESSAGE_OPCODE);
+        }
     }
     private void writeMessage(int[] decoded, int length,int opcode)throws IOException{
         byte[] firstByte = new byte[length + 2];
