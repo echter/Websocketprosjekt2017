@@ -1,7 +1,7 @@
 /**
  * Created by EliasBrattli on 02/05/2017.
  */
-var exampleSocket = new WebSocket("ws://"+window.location.hostname+":2345");
+var exampleSocket = new WebSocket("ws://localhost:2345");
 exampleSocket.onopen = function (event) {
     //exampleSocket.send("abcdef");
 };
