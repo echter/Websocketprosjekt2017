@@ -1,10 +1,2 @@
-no\ntnu\stud\websocket\server\interfaces\Connection.class
-no\ntnu\stud\websocket\server\http\Status.class
-no\ntnu\stud\websocket\server\implementation\SocketServer.class
-no\ntnu\stud\websocket\server\implementation\WebSockets.class
-no\ntnu\stud\websocket\server\Main.class
-no\ntnu\stud\websocket\server\implementation\Socket.class
-no\ntnu\stud\websocket\server\interfaces\Server.class
-no\ntnu\stud\websocket\server\implementation\TCPServer.class
-no\ntnu\stud\websocket\server\interfaces\functionalinterfaces\ActionListener.class
-no\ntnu\stud\websocket\server\http\URL.class
+Test.class
+Test$MyHandler.class
