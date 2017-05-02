@@ -18,11 +18,11 @@ import java.util.regex.Pattern;
 /**
  * Created by Chris on 28.04.2017.
  */
-public class WebSocket implements Runnable{
+public class Websocket implements Runnable{
     private Socket socket;
     private InputStream input;
     private OutputStream output;
-    public WebSocket(Socket socket)throws IOException{
+    public Websocket(Socket socket)throws IOException{
         this.socket = socket;
         input = socket.getInputStream();
         output = socket.getOutputStream();
@@ -39,7 +39,7 @@ public class WebSocket implements Runnable{
             byte[] response = ("HTTP/1.1 101 Switching Protocols\r\n"
                     + "Connection: Upgrade\r\n"
                     + "Upgrade: websocket\r\n"
-                    + "Sec-WebSocket-Accept: "
+                    + "Sec-Websocket-Accept: "
                     + DatatypeConverter
                     .printBase64Binary(
                             MessageDigest
@@ -53,10 +53,11 @@ public class WebSocket implements Runnable{
         }
     }
     private void decodeMessage(InputStream input,OutputStream output)throws IOException, InterruptedException,NoSuchAlgorithmException{
-        while(true){
+        boolean connection = true;
+        while(connection){
             // Reads first byte in message
             int currentBit = input.read();
-            System.out.println("First bit: " + currentBit);
+            System.out.println("CURRENTBIT: ----------- " + currentBit);
 
             if (currentBit == 129) {
                 currentBit = input.read();
@@ -83,12 +84,27 @@ public class WebSocket implements Runnable{
                     for (int i = 2; i < decoded.length + 2; i++) {
                         firstByte[i] = (byte) decoded[i - 2];
                     }
-                    for (Socket s: MultiThreadUtil.getSockets()) {
+                    for (Socket s : MultiThreadUtil.getSockets()) {
                         s.getOutputStream().write(firstByte);
                     }
                 }
+            } else if (currentBit == 136){
+                System.out.println("Closing socket: " + socket);
+                boolean remove = false;
+                for (Socket s : MultiThreadUtil.getSockets()) {
+                    if (s == socket){
+                        remove = true;
+                    }
+                }
+                socket.close();
+                if (remove) {
+                    MultiThreadUtil.removeSocket(socket);
+                }
+                connection = false;
             }
+
         }
+        System.out.println("Completed");
     }
     public void close(){
 

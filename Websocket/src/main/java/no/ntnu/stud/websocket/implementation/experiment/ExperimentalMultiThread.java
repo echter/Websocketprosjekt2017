@@ -52,7 +52,7 @@ public class ExperimentalMultiThread implements Runnable{
                 byte[] response = ("HTTP/1.1 101 Switching Protocols\r\n"
                         + "Connection: Upgrade\r\n"
                         + "Upgrade: websocket\r\n"
-                        + "Sec-WebSocket-Accept: "
+                        + "Sec-Websocket-Accept: "
                         + DatatypeConverter
                         .printBase64Binary(
                                 MessageDigest

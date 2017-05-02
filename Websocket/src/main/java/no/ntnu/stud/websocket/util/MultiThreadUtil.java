@@ -18,4 +18,5 @@ public final class MultiThreadUtil {
     public static Socket getSocket(int i){
         return sockets.get(i);
     }
+    public static void removeSocket(Socket socket) {sockets.remove(socket);}
 }
