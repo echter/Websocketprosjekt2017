@@ -1,6 +1,7 @@
 package no.ntnu.stud.websocket.enums;
 
 /**
+ * Contains standard bit opcodes in Websockets according to rfc6455
  * Created by Chris on 02.05.2017.
  */
 public enum OpCode {

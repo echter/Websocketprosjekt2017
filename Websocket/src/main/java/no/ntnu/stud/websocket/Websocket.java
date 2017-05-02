@@ -34,20 +34,6 @@ public class Websocket {
     private final int KEY_LEN = 4;
     private boolean ping = false;
     private Timer timer = new Timer();
-
-    /**
-     *
-     * @param socket The tcp socket used by the Websocket.
-     * @throws IOException Because Streams are in use.
-     */
-    public Websocket(Socket socket) throws IOException {
-        this.socket = socket;
-        input = socket.getInputStream();
-        output = socket.getOutputStream();
-        status = Status.CONNECTING;
-        timer.schedule(myTask, 30000, 30000);
-    }
-
     private TimerTask myTask = new TimerTask() {
         @Override
         public void run() {
@@ -66,6 +52,20 @@ public class Websocket {
             }
         }
     };
+
+    /**
+     *
+     * @param socket The tcp socket used by the Websocket.
+     * @throws IOException Because Streams are in use.
+     */
+    public Websocket(Socket socket) throws IOException {
+        this.socket = socket;
+        input = socket.getInputStream();
+        output = socket.getOutputStream();
+        status = Status.CONNECTING;
+        timer.schedule(myTask, 30000, 30000);
+    }
+    
 
     /**
      * @throws IOException Because of InputStreams
@@ -110,7 +110,7 @@ public class Websocket {
 
 
     /**
-     * @throws IOException
+     * @throws IOException The outputsteams may throw exception
      */
     public void onMessage()throws IOException{
 

@@ -1,8 +1,7 @@
+import example.Client;
+import example.Server;
 import no.ntnu.stud.websocket.Websocket;
-import no.ntnu.stud.websocket.enums.Status;
-import no.ntnu.stud.websocket.interfaces.WebsocketServer;
 import no.ntnu.stud.websocket.util.MultiThreadUtil;
-
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -13,19 +12,18 @@ import java.net.Socket;
 public class Main {
     public static void main(String[] args) {
         try {
-            int port = 2345;
-            ServerSocket serverSocket = new ServerSocket(port);
+            int serverPort = 2345;
+            int clientPort = 2346;
+            ServerSocket serverSocket = new ServerSocket(serverPort);
+            new Client(clientPort,serverPort);
+            // Run infinitely, listen for clients
             for(;;){
-                Socket socket = serverSocket.accept();
+                Socket socket = serverSocket.accept(); //Accept new clients
                 Server server = new Server(new Websocket(socket));
                 new Thread(server).start();
                 MultiThreadUtil.addSocket(socket);
-                for (WebsocketServer wss : MultiThreadUtil.getThreads()){
-                    if(wss.getWebsocket().getStatus() == Status.CLOSED){
-
-                    }
-                }
             }
+
         }catch (Exception e){
             e.printStackTrace();
         }
