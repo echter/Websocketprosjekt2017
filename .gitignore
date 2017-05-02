@@ -1,5 +1,5 @@
 *.DS_Store
-*Websocket/.iws
+*Websocket/Websocket.iws
 *Websocket/.ipr
 *Websocket/.iml
 .AppleDouble
