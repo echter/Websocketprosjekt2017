@@ -1,22 +1,22 @@
 /**
  * Created by EliasBrattli on 02/05/2017.
  */
-var exampleSocket = new WebSocket("ws://"+window.location.hostname+":2345");
-exampleSocket.onopen = function (event) {
-    //exampleSocket.send("abcdef");
+var ws = new WebSocket("ws://localhost:2345");
+ws.onopen = function (event) {
+    //ws.send("abcdef");
 };
-exampleSocket.onmessage = function (event) {
+ws.onmessage = function (event) {
     console.log(event.data);
 }
 
 function sendMessage() {
-    exampleSocket.send("close");
-    exampleSocket.send("abcdef");
+    ws.send("close");
+    ws.send("abcdef");
 }
 function closeButtonFunction() {
-    exampleSocket.close();
+    ws.close();
 }
 
 document.close(function () {
-    exampleSocket.close();
+    ws.close();
 })

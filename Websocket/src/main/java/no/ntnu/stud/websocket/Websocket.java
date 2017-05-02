@@ -9,6 +9,8 @@ import java.io.*;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.Scanner;
 import java.util.Timer;
@@ -54,8 +56,8 @@ public class Websocket {
                 if (ping && Status.OPEN == status) {
                     onClose();
                 } else if (!ping && Status.OPEN == status) {
-                    Date currentTIme = new Date();
-                    String message = "" + currentTIme.getHours() + ":" + currentTIme.getMinutes() + ":" + currentTIme.getSeconds() + "\n";
+                    LocalTime currentTime = LocalTime.now();
+                    String message = "" + currentTime.getHour()+ ":" + currentTime.getMinute() + ":" + currentTime.getSecond() + "\n";
                     onPing(message);
                     ping = true;
                 }

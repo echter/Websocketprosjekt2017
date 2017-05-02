@@ -2,10 +2,28 @@
 <html lang="en">
 <head>
     <title>Websocket Client</title>
-    <script src="src/main/webapp/Client.js"></script>
+    <!--script src="src/main/webapp/Client.js"></script-->
 </head>
 <body>
+<script>var ws = new WebSocket("ws://localhost:2345");
+ws.onopen = function (event) {
+    //ws.send("abcdef");
+};
+ws.onmessage = function (event) {
+    console.log(event.data);
+}
 
+function sendMessage() {
+    ws.send("close");
+    ws.send("abcdef");
+}
+function closeButtonFunction() {
+    ws.close();
+}
+
+document.close(function () {
+    ws.close();
+})</script>
 <button class="button" id="button" onclick="sendMessage()">Press me</button>
 <button class="close" id="close" onclick="closeButtonFunction()">Close me</button>
 </body>
