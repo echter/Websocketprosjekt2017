@@ -22,6 +22,7 @@ public class Websocket implements Runnable{
     private InputStream input;
     private OutputStream output;
     private Status status;
+    private String magicString = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
     private final int BIT_ADJUSTMENT = 128;
     private final int KEY_LEN = 4;
     public Websocket(Socket socket)throws IOException{
@@ -30,6 +31,7 @@ public class Websocket implements Runnable{
         output = socket.getOutputStream();
         status = Status.CONNECTING;
     }
+
     public void onOpen(InputStream input, OutputStream output)throws IOException,InterruptedException, NoSuchAlgorithmException{
         String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
         System.out.println(dataIn);
@@ -39,50 +41,20 @@ public class Websocket implements Runnable{
         if (get.find()) {
             Matcher match = Pattern.compile("Sec-WebSocket-Key: (.*)").matcher(dataIn);
             boolean foundMatch = match.find();
-            byte[] response = ("HTTP/1.1 101 Switching Protocols\r\n"
-                    + "Connection: Upgrade\r\n"
-                    + "Upgrade: websocket\r\n"
-                    + "Sec-Websocket-Accept: "
-                    + DatatypeConverter
-                    .printBase64Binary(
-                            MessageDigest
-                                    .getInstance("SHA-1")
-                                    .digest((match.group(1) + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")
-                                            .getBytes("UTF-8")))
-                    + "\r\n\r\n")
-                    .getBytes("UTF-8");
+            String responseHeader = "HTTP/1.1 101 Switching Protocols\n";
+            String responseUpgrade = "Upgrade: websocket\n";
+            String responseConnection = "Connection: Upgrade\n";
+            String acceptKey = DatatypeConverter.printBase64Binary(MessageDigest.getInstance("SHA-1").digest((match.group(1) + magicString)
+                    .getBytes("UTF-8")));
+            String responseKey = "Sec-Websocket-Accept: " + acceptKey + "\r\n\r\n";
+            System.out.println(acceptKey);
+            byte[] response = (responseHeader + responseUpgrade + responseConnection + responseKey).getBytes();
             output.write(response, 0, response.length);
             status = Status.OPEN;
             System.out.println("Ok...");
         }
     }
 
-    public void onOpen(String dataIn, OutputStream output)throws IOException,InterruptedException, NoSuchAlgorithmException{
-        //String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
-        System.out.println(dataIn);
-        System.out.println("Incoming...");
-        Matcher get = Pattern.compile("^GET").matcher(dataIn);
-
-        if (get.find()) {
-            Matcher match = Pattern.compile("Sec-WebSocket-Key: (.*)").matcher(dataIn);
-            boolean foundMatch = match.find();
-            byte[] response = ("HTTP/1.1 101 Switching Protocols\r\n"
-                    + "Connection: Upgrade\r\n"
-                    + "Upgrade: websocket\r\n"
-                    + "Sec-Websocket-Accept: "
-                    + DatatypeConverter
-                    .printBase64Binary(
-                            MessageDigest
-                                    .getInstance("SHA-1")
-                                    .digest((match.group(1) + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")
-                                            .getBytes("UTF-8")))
-                    + "\r\n\r\n")
-                    .getBytes("UTF-8");
-            output.write(response, 0, response.length);
-            status = Status.OPEN;
-            System.out.println("Ok...");
-        }
-    }
     public void onMessage(InputStream input)throws IOException, InterruptedException,NoSuchAlgorithmException{
 
         while(status != Status.CLOSED){
@@ -104,6 +76,7 @@ public class Websocket implements Runnable{
         }
         System.out.println("Completed");
     }
+
     private int[] decodeMessage(InputStream input, int length)throws IOException{
         if (length > 0 && length <= 125) {
             int[] key = new int[KEY_LEN];

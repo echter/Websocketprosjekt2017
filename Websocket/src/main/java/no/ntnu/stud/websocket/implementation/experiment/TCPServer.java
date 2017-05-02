@@ -45,7 +45,7 @@ class TCPServer {
                     String responsHeader = "HTTP/1.1 101 Switching Protocols\n";
                     String responsUpgrade = "Upgrade: websocket\n";
                     String responsConnection = "Connection: Upgrade\n";
-                    String responsKey = "Sec-Websocket-Accept: " + acceptKey + "\r\n";
+                    String responsKey = "Sec-Websocket-Accept: " + acceptKey + "\r\n\r\n";
                     String respons = responsHeader + responsUpgrade + responsConnection + responsKey;
                     skriveren.println(respons);
                     System.out.println("success?");
@@ -143,3 +143,28 @@ class WriteFrame {
         os.flush();
     }
 }
+
+/*
+public void onOpen(InputStream input, OutputStream output)throws IOException,InterruptedException, NoSuchAlgorithmException{
+        String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
+        System.out.println(dataIn);
+        System.out.println("Incoming...");
+        Matcher get = Pattern.compile("^GET").matcher(dataIn);
+
+        if (get.find()) {
+            Matcher match = Pattern.compile("Sec-WebSocket-Key: (.*)").matcher(dataIn);
+            boolean foundMatch = match.find();
+            byte[] response = ("HTTP/1.1 101 Switching Protocols\r\n"
+                    + "Connection: Upgrade\r\n"
+                    + "Upgrade: websocket\r\n"
+                    + "Sec-Websocket-Accept: "
+                    + DatatypeConverter.printBase64Binary(MessageDigest.getInstance("SHA-1").digest((match.group(1) + magicString)
+                            .getBytes("UTF-8")))
+                    + "\r\n\r\n")
+                    .getBytes("UTF-8");
+            output.write(response, 0, response.length);
+            status = Status.OPEN;
+            System.out.println("Ok...");
+        }
+    }
+ */
