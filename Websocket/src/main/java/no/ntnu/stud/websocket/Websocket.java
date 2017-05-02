@@ -56,7 +56,8 @@ public class Websocket {
     };
 
     /**
-     *
+     * This constructor initiates the streams used by the websocket.
+     * User is not able to pass streams into the instance, instead streams from the TCP socket is used.
      * @param socket The tcp socket used by the Websocket.
      * @throws IOException Because Streams are in use.
      */
@@ -70,11 +71,13 @@ public class Websocket {
 
 
     /**
-     * The opening handshake between two endpoints
+     *  The opening handshake between two endpoints
      * Is intended to be compatible with HTTP-based software so that HTTP clients
      * and websocket clients may use the same port when commiunicating to a server.
      * This handshake is an HTTP upgrade request.
-     * IOException Because of InputStreams
+     * @throws IOException Because of streams
+     * @throws InterruptedException Because of digesting message
+     * @throws NoSuchAlgorithmException Because of base64
      */
     public void onOpen() throws IOException, InterruptedException, NoSuchAlgorithmException {
         String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
@@ -143,7 +146,6 @@ public class Websocket {
                     ping = false;
                     System.out.println("PONG RECIEVED");
                     currentBit = input.read();
-                    //System.out.println("PONG bit: " + currentBit);
                     int length = currentBit - OVERFLOW_ADJUSTMENT;
                     if (length > 0) {
                         //System.out.println(length + " This is the length of the PONG message");
@@ -235,6 +237,8 @@ public class Websocket {
     }
 
     /**
+     * Is a control frame
+     * Closes every socket which is no longer active. Changes the readystate of this Websocket instance to closed
      * @throws IOException Because of socket tcp I/O operations
      */
     public void onClose() throws IOException {
@@ -245,6 +249,11 @@ public class Websocket {
         }
     }
 
+    /**
+     *
+     * @param text The text contents of Websocket message
+     * @throws IOException Because of streams
+     */
     public void onPing(String text) throws IOException {
         System.out.println("PING SENT");
         if (text != null) {
@@ -255,6 +264,10 @@ public class Websocket {
         }
     }
 
+    /**
+     * Ping in case of empty application data
+     * @throws IOException
+     */
     public void onPing() throws IOException {
         System.out.println("PING SENT");
         byte opCode = (byte) OpCode.PING.getValue();
@@ -263,6 +276,9 @@ public class Websocket {
         socket.getOutputStream().write(response);
     }
 
+    /**
+     * @return the status of the Websocket (Connecting, Open, Closing, Closed)
+     */
     public Status getStatus() {
         return status;
     }
