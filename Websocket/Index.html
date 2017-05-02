@@ -11,6 +11,9 @@ ws.onopen = function (event) {
 };
 ws.onmessage = function (event) {
     console.log(event.data);
+    var div = document.createElement('div');
+    div.innerHTML = "<div> " + event.data + " </div>";
+    document.body.appendChild(div);
 }
 
 function sendMessage() {

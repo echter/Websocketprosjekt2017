@@ -45,7 +45,7 @@ public class Websocket {
         input = socket.getInputStream();
         output = socket.getOutputStream();
         status = Status.CONNECTING;
-        timer.schedule(myTask, 5000, 5000);
+        timer.schedule(myTask, 30000, 30000);
     }
 
     private TimerTask myTask = new TimerTask() {
