@@ -1,6 +1,4 @@
-package no.ntnu.stud.websocket;
-
-import no.ntnu.stud.websocket.implementation.Websocket;
+import no.ntnu.stud.websocket.Websocket;
 import no.ntnu.stud.websocket.util.MultiThreadUtil;
 
 import java.net.ServerSocket;
