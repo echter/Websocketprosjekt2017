@@ -3,6 +3,7 @@ package no.ntnu.stud.websocket.implementation;
 import no.ntnu.stud.websocket.http.Status;
 import no.ntnu.stud.websocket.util.MultiThreadUtil;
 
+import javax.websocket.WebSocketContainer;
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
 import java.net.Socket;
@@ -21,13 +22,14 @@ public class Websocket implements Runnable{
     private InputStream input;
     private OutputStream output;
     private Status status;
+    WebSocketContainer
     public Websocket(Socket socket)throws IOException{
         this.socket = socket;
         input = socket.getInputStream();
         output = socket.getOutputStream();
         status = Status.CONNECTING;
     }
-    private void onOpen(InputStream input, OutputStream output)throws IOException,InterruptedException, NoSuchAlgorithmException{
+    public void onOpen(InputStream input, OutputStream output)throws IOException,InterruptedException, NoSuchAlgorithmException{
         String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
         System.out.println(dataIn);
         System.out.println("Incoming...");
@@ -52,7 +54,33 @@ public class Websocket implements Runnable{
             System.out.println("Ok...");
         }
     }
-    private void onMessage(InputStream input,int len,int opcode)throws IOException, InterruptedException,NoSuchAlgorithmException{
+    public void onOpen(String dataIn, OutputStream output)throws IOException,InterruptedException, NoSuchAlgorithmException{
+        //String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
+        System.out.println(dataIn);
+        System.out.println("Incoming...");
+        Matcher get = Pattern.compile("^GET").matcher(dataIn);
+
+        if (get.find()) {
+            Matcher match = Pattern.compile("Sec-WebSocket-Key: (.*)").matcher(dataIn);
+            boolean foundMatch = match.find();
+            byte[] response = ("HTTP/1.1 101 Switching Protocols\r\n"
+                    + "Connection: Upgrade\r\n"
+                    + "Upgrade: websocket\r\n"
+                    + "Sec-Websocket-Accept: "
+                    + DatatypeConverter
+                    .printBase64Binary(
+                            MessageDigest
+                                    .getInstance("SHA-1")
+                                    .digest((match.group(1) + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11")
+                                            .getBytes("UTF-8")))
+                    + "\r\n\r\n")
+                    .getBytes("UTF-8");
+            output.write(response, 0, response.length);
+            System.out.println("Ok...");
+        }
+    }
+    public void onMessage(InputStream input,int len)throws IOException, InterruptedException,NoSuchAlgorithmException{
+        int opcode = 0b10000001;
         while(status != Status.CLOSED){
             // Reads first byte in message
             int currentBit = input.read();
@@ -103,9 +131,10 @@ public class Websocket implements Runnable{
     @Override
     public void run(){
         try {
+            int frame = 129;
             System.out.println("Log to server. Waiting....");
             onOpen(input,output);
-            onMessage(input,129,0b10000001);
+            onMessage(input,frame);
         }catch (Exception e){
             e.printStackTrace();
         }
