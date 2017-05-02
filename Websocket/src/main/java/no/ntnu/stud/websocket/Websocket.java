@@ -15,16 +15,24 @@ import java.util.regex.Pattern;
 
 
 /**
+ * Websocket api.
+ * Uses standarized methods based on rfc6455 and https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API
  * Created by Chris on 28.04.2017.
  */
-public class Websocket implements Runnable{
+public class Websocket {
     private Socket socket;
     private InputStream input;
     private OutputStream output;
     private Status status;
-    private String magicString = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+    private final String MAGIC_STRING = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
     private final int BIT_ADJUSTMENT = 128;
     private final int KEY_LEN = 4;
+
+    /**
+     *
+     * @param socket
+     * @throws IOException
+     */
     public Websocket(Socket socket)throws IOException{
         this.socket = socket;
         input = socket.getInputStream();
@@ -32,7 +40,13 @@ public class Websocket implements Runnable{
         status = Status.CONNECTING;
     }
 
-    public void onOpen(InputStream input, OutputStream output)throws IOException,InterruptedException, NoSuchAlgorithmException{
+    /**
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws NoSuchAlgorithmException
+     */
+    public void onOpen()throws IOException,InterruptedException, NoSuchAlgorithmException{
         String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
         System.out.println(dataIn);
         System.out.println("Incoming...");
@@ -44,7 +58,8 @@ public class Websocket implements Runnable{
             String responseHeader = "HTTP/1.1 101 Switching Protocols\n";
             String responseUpgrade = "Upgrade: websocket\n";
             String responseConnection = "Connection: Upgrade\n";
-            String acceptKey = DatatypeConverter.printBase64Binary(MessageDigest.getInstance("SHA-1").digest((match.group(1) + magicString)
+            String acceptKey = DatatypeConverter.printBase64Binary(MessageDigest.getInstance("SHA-1")
+                    .digest((match.group(1) + MAGIC_STRING)
                     .getBytes("UTF-8")));
             String responseKey = "Sec-Websocket-Accept: " + acceptKey + "\r\n\r\n";
             System.out.println(acceptKey);
@@ -55,17 +70,24 @@ public class Websocket implements Runnable{
         }
     }
 
-    public void onMessage(InputStream input)throws IOException, InterruptedException,NoSuchAlgorithmException{
+    /**
+     *
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws NoSuchAlgorithmException
+     */
+    public void onMessage()throws IOException, InterruptedException,NoSuchAlgorithmException{
 
         while(status != Status.CLOSED){
             // Reads first byte in message
             int currentBit = input.read();
             System.out.println("First bit: " + currentBit);
+            // Text message
             if (currentBit == OpCode.TEXTMESSAGE.getValue()) {
                 currentBit = input.read();
                 System.out.println("Length bit: " + currentBit);
                 int length = currentBit - BIT_ADJUSTMENT;
-                int[]decoded = decodeMessage(input,length);
+                int[]decoded = decodeMessage(length);
                 if(decoded != null) {
                     writeMessage(decoded,length, OpCode.TEXTMESSAGE.getValue());
                 }
@@ -77,7 +99,13 @@ public class Websocket implements Runnable{
         System.out.println("Completed");
     }
 
-    private int[] decodeMessage(InputStream input, int length)throws IOException{
+    /**
+     *
+     * @param length
+     * @return
+     * @throws IOException
+     */
+    private int[] decodeMessage( int length)throws IOException{
         if (length > 0 && length <= 125) {
             int[] key = new int[KEY_LEN];
             int[] decoded = new int[length];
@@ -96,17 +124,30 @@ public class Websocket implements Runnable{
         }
         return null;
     }
+
+    /**
+     *
+     * @param decoded
+     * @param length
+     * @param opcode
+     * @throws IOException
+     */
     private void writeMessage(int[] decoded, int length,int opcode)throws IOException{
-        byte[] firstByte = new byte[length + 2];
-        firstByte[0] = (byte) opcode;
-        firstByte[1] = (byte) decoded.length;
+        byte[] message = new byte[length + 2];
+        message[0] = (byte) opcode;
+        message[1] = (byte) decoded.length;
         for (int i = 2; i < decoded.length+2; i++) {
-            firstByte[i] = (byte) decoded[i-2];
+            message[i] = (byte) decoded[i-2];
         }
         for (Socket s: MultiThreadUtil.getSockets()) {
-            s.getOutputStream().write(firstByte);
+            s.getOutputStream().write(message);
         }
     }
+
+    /**
+     * 
+     * @throws IOException
+     */
     public void onClose()throws IOException{
         System.out.println("Closing socket: " + socket);
         if(MultiThreadUtil.removeSocket(socket)){
@@ -122,16 +163,6 @@ public class Websocket implements Runnable{
     }
     public Status getStatus(){
         return status;
-    }
-    @Override
-    public void run(){
-        try {
-            System.out.println("Log to server. Waiting....");
-            onOpen(input,output);
-            onMessage(input);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
     }
 
 

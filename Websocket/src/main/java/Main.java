@@ -5,6 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 /**
+ * Main class for running server
  * Created by EliasBrattli on 25/04/2017.
  */
 public class Main {
@@ -14,7 +15,8 @@ public class Main {
             ServerSocket serverSocket = new ServerSocket(port);
             for(;;){
                 Socket socket = serverSocket.accept();
-                new Thread(new Websocket(socket)).start();
+                Server server = new Server(new Websocket(socket));
+                new Thread(server).start();
                 MultiThreadUtil.addSocket(socket);
             }
         }catch (Exception e){
