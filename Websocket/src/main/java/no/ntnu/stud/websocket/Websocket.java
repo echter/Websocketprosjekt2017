@@ -1,8 +1,8 @@
-package no.ntnu.stud.websocket.implementation;
+package no.ntnu.stud.websocket;
 
-import no.ntnu.stud.websocket.http.Status;
+import no.ntnu.stud.websocket.enums.Status;
 import no.ntnu.stud.websocket.util.MultiThreadUtil;
-import no.ntnu.stud.websocket.util.OpCode;
+import no.ntnu.stud.websocket.enums.OpCode;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.*;
@@ -23,6 +23,8 @@ public class Websocket implements Runnable{
     private OutputStream output;
     private Status status;
     private String magicString = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+    private final int BIT_ADJUSTMENT = 128;
+    private final int KEY_LEN = 4;
     public Websocket(Socket socket)throws IOException{
         this.socket = socket;
         input = socket.getInputStream();
@@ -54,6 +56,7 @@ public class Websocket implements Runnable{
     }
 
     public void onMessage(InputStream input)throws IOException, InterruptedException,NoSuchAlgorithmException{
+
         while(status != Status.CLOSED){
             // Reads first byte in message
             int currentBit = input.read();
@@ -61,36 +64,37 @@ public class Websocket implements Runnable{
             if (currentBit == OpCode.TEXTMESSAGE.getValue()) {
                 currentBit = input.read();
                 System.out.println("Length bit: " + currentBit);
-                int length = currentBit - 128;
-                if (length > 0 && length <= 125) {
-                    int[] key = new int[4];
-                    int[] decoded = new int[length];
-                    for (int i = 0; i < 4; i++) {
-                        key[i] = input.read();
-                        System.out.println("KEY: " + key[i]);
-                    }
-                    for (int i = 0; i < length; i++) {
-                        int encoded = input.read();
-                        decoded[i] = (byte) (encoded ^ key[i & 0x3]);
-                    }
-                    for (int i = 0; i < decoded.length; i++) {
-                        System.out.println("OUT: " + decoded[i]);
-                    }
-
+                int length = currentBit - BIT_ADJUSTMENT;
+                int[]decoded = decodeMessage(input,length);
+                if(decoded != null) {
                     writeMessage(decoded,length, OpCode.TEXTMESSAGE.getValue());
                 }
             } else if (currentBit == OpCode.CLOSE.getValue()){
                 status = Status.CLOSING;
                 onClose();
             }
-
         }
         System.out.println("Completed");
     }
-    private void getSockets(){
-        for (Socket s : MultiThreadUtil.getSockets()){
-            System.out.println(s);
+
+    private int[] decodeMessage(InputStream input, int length)throws IOException{
+        if (length > 0 && length <= 125) {
+            int[] key = new int[KEY_LEN];
+            int[] decoded = new int[length];
+            for (int i = 0; i < KEY_LEN; i++) {
+                key[i] = input.read();
+                System.out.println("KEY: " + key[i]);
+            }
+            for (int i = 0; i < length; i++) {
+                int encoded = input.read();
+                decoded[i] = (byte) (encoded ^ key[i & 0x3]);
+            }
+            for (int i = 0; i < decoded.length; i++) {
+                System.out.println("OUT: " + decoded[i]);
+            }
+           return decoded;
         }
+        return null;
     }
     private void writeMessage(int[] decoded, int length,int opcode)throws IOException{
         byte[] firstByte = new byte[length + 2];

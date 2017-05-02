@@ -1,6 +1,4 @@
-package no.ntnu.stud.websocket;
-
-import no.ntnu.stud.websocket.implementation.Websocket;
+import no.ntnu.stud.websocket.Websocket;
 import no.ntnu.stud.websocket.util.MultiThreadUtil;
 
 import java.net.ServerSocket;
@@ -12,7 +10,8 @@ import java.net.Socket;
 public class Main {
     public static void main(String[] args) {
         try {
-            ServerSocket serverSocket = new ServerSocket(2345);
+            int port = 2345;
+            ServerSocket serverSocket = new ServerSocket(port);
             for(;;){
                 Socket socket = serverSocket.accept();
                 new Thread(new Websocket(socket)).start();
