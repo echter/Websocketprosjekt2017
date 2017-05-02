@@ -1,5 +1,7 @@
 package no.ntnu.stud.websocket.util;
 
+import no.ntnu.stud.websocket.interfaces.WebsocketServer;
+
 import java.net.Socket;
 import java.util.ArrayList;
 
@@ -8,7 +10,7 @@ import java.util.ArrayList;
  */
 public final class MultiThreadUtil {
     static ArrayList<Socket> sockets = new ArrayList<>();
-    static ArrayList<Runnable> threads = new ArrayList<>();
+    static ArrayList<WebsocketServer> threads = new ArrayList<>();
     private MultiThreadUtil(){}
     public static void addSocket(Socket socket){
         sockets.add(socket);
@@ -21,7 +23,7 @@ public final class MultiThreadUtil {
     }
     public static boolean removeSocket(Socket socket) {return sockets.remove(socket);}
 
-    public static ArrayList<Runnable> getThreads() {
+    public static ArrayList<WebsocketServer> getThreads() {
         return threads;
     }
 }

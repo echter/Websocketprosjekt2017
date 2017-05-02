@@ -18,23 +18,30 @@ import java.util.regex.Pattern;
 
 
 /**
+ * Websocket api.
+ * Uses standarized methods based on rfc6455 and https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API
  * Created by Chris on 28.04.2017.
  */
-public class Websocket implements Runnable{
+public class Websocket {
     private Socket socket;
     private InputStream input;
     private OutputStream output;
     private Status status;
-    private String magicString = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-    private final int BIT_ADJUSTMENT = 128;
+    private final String MAGIC_STRING = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+    private final int OVERFLOW_ADJUSTMENT = 128;
     private final int KEY_LEN = 4;
     private boolean ping = false;
-    public Websocket(Socket socket)throws IOException{
+
+    /**
+     * @param socket
+     * @throws IOException
+     */
+    public Websocket(Socket socket) throws IOException {
         this.socket = socket;
         input = socket.getInputStream();
         output = socket.getOutputStream();
         status = Status.CONNECTING;
-        timer.schedule(myTask, 10000, 10000);
+        timer.schedule(myTask, 30000, 30000);
     }
 
     Timer timer = new Timer();
@@ -42,10 +49,10 @@ public class Websocket implements Runnable{
         @Override
         public void run() {
             try {
-                System.out.println("STATUS: " + status);
-                if (ping && Status.OPEN == status){
+                System.out.println("SOCKET: " + socket + " STATUS " + status);
+                if (ping && Status.OPEN == status) {
                     onClose();
-                } else if (!ping && Status.OPEN == status){
+                } else if (!ping && Status.OPEN == status) {
                     Date currentTIme = new Date();
                     String message = "" + currentTIme.getHours() + ":" + currentTIme.getMinutes() + ":" + currentTIme.getSeconds() + "\n";
                     onPing(message);
@@ -57,8 +64,12 @@ public class Websocket implements Runnable{
         }
     };
 
-    //When the websocket opens, this will be the first thing to run.
-    public void onOpen(InputStream input, OutputStream output)throws IOException,InterruptedException, NoSuchAlgorithmException{
+    /**
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws NoSuchAlgorithmException
+     */
+    public void onOpen() throws IOException, InterruptedException, NoSuchAlgorithmException {
         String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
         System.out.println(dataIn);
         System.out.println("Incoming...");
@@ -74,8 +85,9 @@ public class Websocket implements Runnable{
 
             //This is more or less taken from: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_a_WebSocket_server_in_Java
             //And is a great way of generating the accept key for the handshake.
-            String acceptKey = DatatypeConverter.printBase64Binary(MessageDigest.getInstance("SHA-1").digest((match.group(1) + magicString)
-                    .getBytes("UTF-8")));
+            String acceptKey = DatatypeConverter.printBase64Binary(MessageDigest.getInstance("SHA-1")
+                    .digest((match.group(1) + MAGIC_STRING)
+                            .getBytes("UTF-8")));
 
 
             String responseKey = "Sec-Websocket-Accept: " + acceptKey + "\r\n\r\n";
@@ -93,41 +105,48 @@ public class Websocket implements Runnable{
         }
     }
 
-    //When a message is received this function will run.
-    public void onMessage(InputStream input)throws IOException, InterruptedException,NoSuchAlgorithmException{
+
+    /**
+     * @throws IOException
+     * @throws InterruptedException
+     * @throws NoSuchAlgorithmException
+     */
+    public void onMessage() throws IOException, InterruptedException, NoSuchAlgorithmException {
 
         //If the connection is closed, this wont run.
-        while(status != Status.CLOSED){
+        while (status != Status.CLOSED) {
             // Reads first byte in message
             int currentBit = input.read();
+
             //System.out.println("First bit: " + currentBit);
+
             if (currentBit == OpCode.TEXTMESSAGE.getValue()) {
                 currentBit = input.read();
                 System.out.println("Length bit: " + currentBit);
-                int length = currentBit - BIT_ADJUSTMENT;
-                int[]decoded = decodeMessage(input,length);
-                if(decoded != null) {
-                    writeMessage(decoded,length, OpCode.TEXTMESSAGE.getValue());
+                int length = currentBit - OVERFLOW_ADJUSTMENT;
+                int[] decoded = decodeMessage(length);
+                if (decoded != null) {
+                    writeMessage(decoded, length, OpCode.TEXTMESSAGE.getValue());
                 }
-            } else if (currentBit == OpCode.CLOSE.getValue()){
+            } else if (currentBit == OpCode.CLOSE.getValue()) {
                 status = Status.CLOSING;
                 onClose();
-            } else if (currentBit == OpCode.PONG.getValue()){
+            } else if (currentBit == OpCode.PONG.getValue()) {
                 ping = false;
                 System.out.println("PONG RECIEVED");
                 currentBit = input.read();
                 //System.out.println("PONG bit: " + currentBit);
-                int length = currentBit - BIT_ADJUSTMENT;
-                if (length > 0){
+                int length = currentBit - OVERFLOW_ADJUSTMENT;
+                if (length > 0) {
                     //System.out.println(length + " This is the length of the PONG message");
-                    int[] decoded = decodeMessage(input,length);
+                    int[] decoded = decodeMessage(length);
                     String message = "";
-                    for (int decode : decoded){
-                        message += (char)decode;
+                    for (int decode : decoded) {
+                        message += (char) decode;
                     }
                     System.out.println(message);
                 } else {
-                    for (int i = 0; i < KEY_LEN; i++){
+                    for (int i = 0; i < KEY_LEN; i++) {
                         input.read(); //this gets rid of the decryption keys that exist even when there is no message
                     }
                     //System.out.println("There was no message in this ping.");
@@ -137,7 +156,12 @@ public class Websocket implements Runnable{
         System.out.println("Completed");
     }
 
-    private int[] decodeMessage(InputStream input, int length)throws IOException{
+    /**
+     * @param length
+     * @return
+     * @throws IOException
+     */
+    private int[] decodeMessage(int length) throws IOException {
         if (length > 0 && length <= 125) {
             int[] key = new int[KEY_LEN];
             int[] decoded = new int[length];
@@ -152,47 +176,58 @@ public class Websocket implements Runnable{
             for (int i = 0; i < decoded.length; i++) {
                 //System.out.println("OUT: " + decoded[i]);
             }
-           return decoded;
+            return decoded;
         }
         return null;
     }
-    private void writeMessage(int[] decoded, int length,int opcode)throws IOException{
-        byte[] firstByte = new byte[length + 2];
-        firstByte[0] = (byte) opcode;
-        firstByte[1] = (byte) decoded.length;
-        for (int i = 2; i < decoded.length+2; i++) {
-            firstByte[i] = (byte) decoded[i-2];
+
+    /**
+     * @param decoded
+     * @param length
+     * @param opcode
+     * @throws IOException
+     */
+    private void writeMessage(int[] decoded, int length, int opcode) throws IOException {
+        byte[] message = new byte[length + 2];
+        message[0] = (byte) opcode;
+        message[1] = (byte) decoded.length;
+        for (int i = 2; i < decoded.length + 2; i++) {
+            message[i] = (byte) decoded[i - 2];
         }
-        for (Socket s: MultiThreadUtil.getSockets()) {
-            s.getOutputStream().write(firstByte);
+        for (Socket s : MultiThreadUtil.getSockets()) {
+            s.getOutputStream().write(message);
         }
     }
 
     //DONT REMOVE THIS, IT LOOKS THE SAME BUT TAKES BYTE[] INSTEAD OF INT
-    private void writeMessage(byte[] decoded, int length,int opcode)throws IOException{
+    private void writeMessage(byte[] decoded, int length, int opcode) throws IOException {
         byte[] firstByte = new byte[length + 2];
         firstByte[0] = (byte) (opcode);
         firstByte[1] = (byte) decoded.length;
-        for (int i = 2; i < decoded.length+2; i++) {
-            firstByte[i] =  decoded[i-2];
+        for (int i = 2; i < decoded.length + 2; i++) {
+            firstByte[i] = decoded[i - 2];
         }
-        for (Socket s: MultiThreadUtil.getSockets()) {
+        for (Socket s : MultiThreadUtil.getSockets()) {
             s.getOutputStream().write(firstByte);
         }
     }
 
-    public void onClose()throws IOException{
+    /**
+     * @throws IOException
+     */
+    public void onClose() throws IOException {
         System.out.println("Closing socket: " + socket);
-        if(MultiThreadUtil.removeSocket(socket)){
+        if (MultiThreadUtil.removeSocket(socket)) {
             socket.close();
             status = Status.CLOSED;
         }
     }
+
     public void onPing(String text) throws IOException {
         System.out.println("PING SENT");
         if (text != null) {
             byte[] bytes = text.getBytes();
-            writeMessage(bytes,bytes.length,OpCode.PING.getValue());
+            writeMessage(bytes, bytes.length, OpCode.PING.getValue());
         } else {
             System.out.println("PING TEXT CANT BE NULL");
         }
@@ -202,22 +237,12 @@ public class Websocket implements Runnable{
         System.out.println("PING SENT");
         byte opCode = (byte) OpCode.PING.getValue();
         byte noText = (byte) 0b0000000;
-        byte[] response = {opCode,noText};
+        byte[] response = {opCode, noText};
         socket.getOutputStream().write(response);
     }
 
-    public Status getStatus(){
+    public Status getStatus() {
         return status;
-    }
-    @Override
-    public void run(){
-        try {
-            System.out.println("Log to server. Waiting....");
-            onOpen(input,output);
-            onMessage(input);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
     }
 }
 
