@@ -1,8 +1,10 @@
+package example;
+
 import no.ntnu.stud.websocket.Websocket;
 import no.ntnu.stud.websocket.interfaces.WebsocketServer;
 
 /**
- * Server class supporting multi threading
+ * example.Server class supporting multi threading
  * Created by EliasBrattli on 02/05/2017.
  */
 public class Server implements WebsocketServer {

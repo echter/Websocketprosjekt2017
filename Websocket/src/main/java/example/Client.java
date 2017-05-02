@@ -1,6 +1,5 @@
+package example;
 
-
-import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.*;
@@ -12,16 +11,20 @@ import com.sun.net.httpserver.HttpServer;
 
 
 public class Client {
-    public static void main(String[] args) throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress(2346), 0);
+    static String serverPortConcat = "";
+    public Client(int clientPort,int serverPort)throws IOException{
+        serverPortConcat += serverPort;
+        HttpServer server = HttpServer.create(new InetSocketAddress(clientPort), 0);
         server.createContext("/test", new MyHandler());
         server.start();
     }
-
    static String getIpName(){
        return "localhost";
    }
-    public static String getIpv4Address() throws Exception {
+   static String getPort(){
+       return "2346";
+   }
+   static String getIpv4Address() throws Exception {
         Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
         while (interfaces.hasMoreElements()) {
             NetworkInterface networkInterface = interfaces.nextElement();
@@ -34,8 +37,6 @@ public class Client {
                 if(addr instanceof Inet4Address ) {
                     if(!networkInterface.isLoopback() && !networkInterface.isVirtual() && !networkInterface.isPointToPoint() ) {
                         String name = networkInterface.getDisplayName();
-                        System.out.println(String.format("NetInterface: name [%s], ip [%s]",
-                                name, addr.getHostAddress()));
                         if(!name.contains("Ethernet")&&!name.contains("Virtualbox")) {
                             return addr.getHostAddress();
                         }
@@ -52,11 +53,12 @@ public class Client {
                 String response = "<!doctype html>\n" +
                         "<html lang=\"en\">\n" +
                         "<head>\n" +
-                        "    <title>Websocket Client</title>\n" +
-                        "    <!--script src=\"src/main/webapp/Client.js\"></script-->\n" +
+                        "    <title>Websocket example.Client</title>\n" +
+                        "    <!--script src=\"src/main/webapp/example.Client.js\"></script-->\n" +
                         "</head>\n" +
                         "<body>\n" +
-                        "<script>var ws = new WebSocket(\"ws://" +getIpv4Address()+ ":2345\");\n" +
+                        //"<script>var ws = new WebSocket(\"ws://" +getIpv4Address()+ ":2345\");\n" +
+                        "<script>var ws = new WebSocket(\"ws://" +getIpv4Address()+ ":"+ serverPortConcat +"\");\n" +
                         "ws.onopen = function (event) {\n" +
                         "    //ws.send(\"abcdef\");\n" +
                         "};\n" +
