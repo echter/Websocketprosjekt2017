@@ -12,7 +12,7 @@ import com.sun.net.httpserver.HttpServer;
 
 public class Client {
     static String serverPortConcat = "";
-    private final String path = "/Index";
+    private final String path = "/index";
     private int clientPort;
     private int serverPort;
     public Client(int clientPort,int serverPort)throws IOException{
