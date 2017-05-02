@@ -25,7 +25,7 @@ public class Websocket {
     private OutputStream output;
     private Status status;
     private final String MAGIC_STRING = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-    private final int BIT_ADJUSTMENT = 128;
+    private final int OVERFLOW_ADJUSTMENT = 128;
     private final int KEY_LEN = 4;
 
     /**
@@ -71,7 +71,7 @@ public class Websocket {
     }
 
     /**
-     *
+     * 
      * @throws IOException
      * @throws InterruptedException
      * @throws NoSuchAlgorithmException
@@ -86,7 +86,7 @@ public class Websocket {
             if (currentBit == OpCode.TEXTMESSAGE.getValue()) {
                 currentBit = input.read();
                 System.out.println("Length bit: " + currentBit);
-                int length = currentBit - BIT_ADJUSTMENT;
+                int length = currentBit - OVERFLOW_ADJUSTMENT;
                 int[]decoded = decodeMessage(length);
                 if(decoded != null) {
                     writeMessage(decoded,length, OpCode.TEXTMESSAGE.getValue());
@@ -145,7 +145,7 @@ public class Websocket {
     }
 
     /**
-     * 
+     *
      * @throws IOException
      */
     public void onClose()throws IOException{
