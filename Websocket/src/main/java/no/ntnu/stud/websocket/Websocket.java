@@ -175,8 +175,15 @@ public class Websocket {
     }
 
     /**
+     * This function takes only in the length of the message to be decoded. This is due to the fact that the way we implemented
+     * our reader (input.read()) means that it will only read one byte at a time. This means that it doesnt need to take in the
+     * message itself due to it being able to read as it runs. The way the decoding works it that it takes the four bytes after
+     * the length indicator and uses them to decode all the other bytes after it. The keys change between each run and so do the
+     * byte values of the coded bytes. But together they always give the correct value when the algorithm is applied. This algorithm
+     * is inspired by the one at:
+     * https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_a_WebSocket_server_in_Java.
      * @param length
-     * @return
+     * @return decoded message
      * @throws IOException
      */
     private int[] decodeMessage(int length) throws IOException {
@@ -200,6 +207,11 @@ public class Websocket {
     }
 
     /**
+     * This function takes in a decoded message, the length of the decoded message and a frame opcode.
+     * It then combines them all in a byte array, opcode first, then the length and then the unmasked bytes.
+     * Then it sends it all as a single message to the output stream.
+     * The output stream will send it as a TCP frame to the client, the type of frame is decided by the opcode.
+     * The payload will be the decoded bytes.
      * @param decoded Int values of decoded array
      * @param length
      * @param opcode
@@ -218,7 +230,11 @@ public class Websocket {
     }
 
     /**
-     *
+     * This function takes in a decoded message, the length of the decoded message and a frame opcode.
+     * It then combines them all in a byte array, opcode first, then the length and then the unmasked bytes.
+     * Then it sends it all as a single message to the output stream.
+     * The output stream will send it as a TCP frame to the client, the type of frame is decided by the opcode.
+     * The payload will be the decoded bytes.
      * @param decoded Byte value of decoded array
      * @param length
      * @param opcode
