@@ -52,6 +52,7 @@ public class Websocket {
             }
         }
     };
+
     /**
      *
      * @param socket The tcp socket used by the Websocket.
@@ -62,8 +63,9 @@ public class Websocket {
         input = socket.getInputStream();
         output = socket.getOutputStream();
         status = Status.CONNECTING;
-        timer.schedule(myTask, 5000, 5000);
+        timer.schedule(myTask, 30000, 30000);
     }
+    
 
     /**
      * @throws IOException Because of InputStreams

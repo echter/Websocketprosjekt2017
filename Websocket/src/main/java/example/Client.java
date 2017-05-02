@@ -64,11 +64,13 @@ public class Client {
                         "};\n" +
                         "ws.onmessage = function (event) {\n" +
                         "    console.log(event.data);\n" +
+                        "    var div = document.createElement('div');\n" +
+                        "    div.innerHTML = \"<div> \" + event.data + \" </div>\";\n" +
+                        "    document.body.appendChild(div);\n" +
                         "}\n" +
                         "\n" +
                         "function sendMessage() {\n" +
-                        "    ws.send(\"close\");\n" +
-                        "    ws.send(\"abcdef\");\n" +
+                        "    ws.send(\"This is a message\");\n" +
                         "}\n" +
                         "function closeButtonFunction() {\n" +
                         "    ws.close();\n" +
