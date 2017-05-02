@@ -77,7 +77,8 @@ public class Websocket {
         //If connection is found, it will attempt the handshake
         if (get.find()) {
             Matcher match = Pattern.compile("Sec-WebSocket-Key: (.*)").matcher(dataIn);
-            boolean foundMatch = match.find();
+            System.out.println("DATA IN:     " + dataIn);
+            match.find();
             String responseHeader = "HTTP/1.1 101 Switching Protocols\n";
             String responseUpgrade = "Upgrade: websocket\n";
             String responseConnection = "Connection: Upgrade\n";
