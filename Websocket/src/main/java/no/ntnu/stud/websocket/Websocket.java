@@ -33,8 +33,9 @@ public class Websocket {
     private boolean ping = false;
 
     /**
-     * @param socket
-     * @throws IOException
+     *
+     * @param socket The tcp socket used by the Websocket.
+     * @throws IOException Because Streams are in use.
      */
     public Websocket(Socket socket) throws IOException {
         this.socket = socket;
@@ -65,9 +66,7 @@ public class Websocket {
     };
 
     /**
-     * @throws IOException
-     * @throws InterruptedException
-     * @throws NoSuchAlgorithmException
+     * @throws IOException Because of InputStreams
      */
     public void onOpen() throws IOException, InterruptedException, NoSuchAlgorithmException {
         String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
@@ -108,10 +107,9 @@ public class Websocket {
 
     /**
      * @throws IOException
-     * @throws InterruptedException
-     * @throws NoSuchAlgorithmException
      */
-    public void onMessage() throws IOException, InterruptedException, NoSuchAlgorithmException {
+    public void onMessage()throws IOException{
+
 
         //If the connection is closed, this wont run.
         while (status != Status.CLOSED) {
@@ -182,7 +180,7 @@ public class Websocket {
     }
 
     /**
-     * @param decoded
+     * @param decoded Int values of decoded array
      * @param length
      * @param opcode
      * @throws IOException
@@ -199,7 +197,13 @@ public class Websocket {
         }
     }
 
-    //DONT REMOVE THIS, IT LOOKS THE SAME BUT TAKES BYTE[] INSTEAD OF INT
+    /**
+     *
+     * @param decoded Byte value of decoded array
+     * @param length
+     * @param opcode
+     * @throws IOException
+     */
     private void writeMessage(byte[] decoded, int length, int opcode) throws IOException {
         byte[] firstByte = new byte[length + 2];
         firstByte[0] = (byte) (opcode);
@@ -213,7 +217,7 @@ public class Websocket {
     }
 
     /**
-     * @throws IOException
+     * @throws IOException Because of socket tcp I/O operations
      */
     public void onClose() throws IOException {
         System.out.println("Closing socket: " + socket);
