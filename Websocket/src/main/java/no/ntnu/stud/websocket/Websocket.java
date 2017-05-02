@@ -30,8 +30,8 @@ public class Websocket {
 
     /**
      *
-     * @param socket
-     * @throws IOException
+     * @param socket The tcp socket used by the Websocket.
+     * @throws IOException Because Streams are in use.
      */
     public Websocket(Socket socket)throws IOException{
         this.socket = socket;
@@ -42,7 +42,7 @@ public class Websocket {
 
     /**
      *
-     * @throws IOException
+     * @throws IOException Because of InputStreams
      * @throws InterruptedException
      * @throws NoSuchAlgorithmException
      */
@@ -73,10 +73,8 @@ public class Websocket {
     /**
      * 
      * @throws IOException
-     * @throws InterruptedException
-     * @throws NoSuchAlgorithmException
      */
-    public void onMessage()throws IOException, InterruptedException,NoSuchAlgorithmException{
+    public void onMessage()throws IOException{
 
         while(status != Status.CLOSED){
             // Reads first byte in message
