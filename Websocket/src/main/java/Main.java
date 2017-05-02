@@ -1,4 +1,6 @@
 import no.ntnu.stud.websocket.Websocket;
+import no.ntnu.stud.websocket.enums.Status;
+import no.ntnu.stud.websocket.interfaces.WebsocketServer;
 import no.ntnu.stud.websocket.util.MultiThreadUtil;
 
 import java.net.ServerSocket;
@@ -18,6 +20,11 @@ public class Main {
                 Server server = new Server(new Websocket(socket));
                 new Thread(server).start();
                 MultiThreadUtil.addSocket(socket);
+                for (WebsocketServer wss : MultiThreadUtil.getThreads()){
+                    if(wss.getWebsocket().getStatus() == Status.CLOSED){
+
+                    }
+                }
             }
         }catch (Exception e){
             e.printStackTrace();
