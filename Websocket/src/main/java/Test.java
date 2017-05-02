@@ -13,7 +13,7 @@ import com.sun.net.httpserver.HttpServer;
 public class Test {
 
     public static void main(String[] args) throws Exception {
-        HttpServer server = HttpServer.create(new InetSocketAddress(2345), 0);
+        HttpServer server = HttpServer.create(new InetSocketAddress(2346), 0);
         server.createContext("/test", new MyHandler());
         server.start();
     }
@@ -28,7 +28,7 @@ public class Test {
                     "    <!--script src=\"src/main/webapp/Client.js\"></script-->\n" +
                     "</head>\n" +
                     "<body>\n" +
-                    "<script>var ws = new WebSocket(\"ws://\"+window.location.hostname+\":2345\");\n" +
+                    "<script>var ws = new WebSocket(\"ws://localhost:2345\");\n" +
                     "ws.onopen = function (event) {\n" +
                     "    //ws.send(\"abcdef\");\n" +
                     "};\n" +
