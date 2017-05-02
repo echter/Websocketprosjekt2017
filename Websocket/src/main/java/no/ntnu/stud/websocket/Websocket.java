@@ -117,41 +117,47 @@ public class Websocket {
         //If the connection is closed, this wont run.
         while (status != Status.CLOSED) {
             // Reads first byte in message
-            int currentBit = input.read();
 
-            //System.out.println("First bit: " + currentBit);
+            try {
+                int currentBit = input.read();
 
-            if (currentBit == OpCode.TEXTMESSAGE.getValue()) {
-                currentBit = input.read();
-                System.out.println("Length bit: " + currentBit);
-                int length = currentBit - OVERFLOW_ADJUSTMENT;
-                int[] decoded = decodeMessage(length);
-                if (decoded != null) {
-                    writeMessage(decoded, length, OpCode.TEXTMESSAGE.getValue());
-                }
-            } else if (currentBit == OpCode.CLOSE.getValue()) {
-                status = Status.CLOSING;
-                onClose();
-            } else if (currentBit == OpCode.PONG.getValue()) {
-                ping = false;
-                System.out.println("PONG RECIEVED");
-                currentBit = input.read();
-                //System.out.println("PONG bit: " + currentBit);
-                int length = currentBit - OVERFLOW_ADJUSTMENT;
-                if (length > 0) {
-                    //System.out.println(length + " This is the length of the PONG message");
+                //System.out.println("First bit: " + currentBit);
+
+                if (currentBit == OpCode.TEXTMESSAGE.getValue()) {
+                    currentBit = input.read();
+                    System.out.println("Length bit: " + currentBit);
+                    int length = currentBit - OVERFLOW_ADJUSTMENT;
                     int[] decoded = decodeMessage(length);
-                    String message = "";
-                    for (int decode : decoded) {
-                        message += (char) decode;
+                    if (decoded != null) {
+                        writeMessage(decoded, length, OpCode.TEXTMESSAGE.getValue());
                     }
-                    System.out.println(message);
-                } else {
-                    for (int i = 0; i < KEY_LEN; i++) {
-                        input.read(); //this gets rid of the decryption keys that exist even when there is no message
+                } else if (currentBit == OpCode.CLOSE.getValue()) {
+                    status = Status.CLOSING;
+                    onClose();
+                } else if (currentBit == OpCode.PONG.getValue()) {
+                    ping = false;
+                    System.out.println("PONG RECIEVED");
+                    currentBit = input.read();
+                    //System.out.println("PONG bit: " + currentBit);
+                    int length = currentBit - OVERFLOW_ADJUSTMENT;
+                    if (length > 0) {
+                        //System.out.println(length + " This is the length of the PONG message");
+                        int[] decoded = decodeMessage(length);
+                        String message = "";
+                        for (int decode : decoded) {
+                            message += (char) decode;
+                        }
+                        System.out.println(message);
+                    } else {
+                        for (int i = 0; i < KEY_LEN; i++) {
+                            input.read(); //this gets rid of the decryption keys that exist even when there is no message
+                        }
+                        //System.out.println("There was no message in this ping.");
                     }
-                    //System.out.println("There was no message in this ping.");
                 }
+            } catch (Exception e){
+                System.out.println("LOST CONNECTION... SOCKET CLOSING...");
+                socket.close();
             }
         }
         System.out.println("Completed");
@@ -174,9 +180,9 @@ public class Websocket {
                 int encoded = input.read();
                 decoded[i] = (byte) (encoded ^ key[i & 0x3]);
             }
-            for (int i = 0; i < decoded.length; i++) {
+            //for (int i = 0; i < decoded.length; i++) {
                 //System.out.println("OUT: " + decoded[i]);
-            }
+            //}
             return decoded;
         }
         return null;
