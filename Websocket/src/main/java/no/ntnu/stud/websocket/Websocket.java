@@ -41,6 +41,7 @@ public class Websocket {
                 System.out.println("SOCKET: " + socket + " STATUS " + status);
                 if (ping && Status.OPEN == status) {
                     onClose();
+                    System.out.println("CLOSED DUE TO UNRESPONSIVE PING");
                 } else if (!ping && Status.OPEN == status) {
                     LocalTime currentTime = LocalTime.now();
                     String message = "" + currentTime.getHour()+ ":" + currentTime.getMinute() + ":" + currentTime.getSecond() + "\n";
@@ -49,6 +50,7 @@ public class Websocket {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+                System.out.println("PING ERROR");
             }
         }
     };
