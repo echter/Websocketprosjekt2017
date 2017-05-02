@@ -91,7 +91,6 @@ public class Websocket {
                     .digest((match.group(1) + MAGIC_STRING)
                             .getBytes("UTF-8")));
 
-
             String responseKey = "Sec-Websocket-Accept: " + acceptKey + "\r\n\r\n";
             System.out.println(acceptKey);
 
