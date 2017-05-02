@@ -32,32 +32,47 @@ public class Websocket implements Runnable{
         status = Status.CONNECTING;
     }
 
+    //When the websocket opens, this will be the first thing to run.
     public void onOpen(InputStream input, OutputStream output)throws IOException,InterruptedException, NoSuchAlgorithmException{
         String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
         System.out.println(dataIn);
         System.out.println("Incoming...");
         Matcher get = Pattern.compile("^GET").matcher(dataIn);
 
+        //If connection is found, it will attempt the handshake
         if (get.find()) {
             Matcher match = Pattern.compile("Sec-WebSocket-Key: (.*)").matcher(dataIn);
             boolean foundMatch = match.find();
             String responseHeader = "HTTP/1.1 101 Switching Protocols\n";
             String responseUpgrade = "Upgrade: websocket\n";
             String responseConnection = "Connection: Upgrade\n";
+
+            //This is more or less taken from: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_a_WebSocket_server_in_Java
+            //And is a great way of generating the accept key for the handshake.
             String acceptKey = DatatypeConverter.printBase64Binary(MessageDigest.getInstance("SHA-1").digest((match.group(1) + magicString)
                     .getBytes("UTF-8")));
+
+
             String responseKey = "Sec-Websocket-Accept: " + acceptKey + "\r\n\r\n";
             System.out.println(acceptKey);
+
+            //Converts everything to a byte[] array, this is needed for sending as everything has to be sent in the same response.
             byte[] response = (responseHeader + responseUpgrade + responseConnection + responseKey).getBytes();
             output.write(response, 0, response.length);
+
+            //Status set to OPEN
             status = Status.OPEN;
             System.out.println("Ok...");
+
+            //This tests the PING function, it should respons with a PONG function if successful
             onPing("THIS IS A PING");
         }
     }
 
+    //When a message is received this function will run.
     public void onMessage(InputStream input)throws IOException, InterruptedException,NoSuchAlgorithmException{
 
+        //If the connection is closed, this wont run.
         while(status != Status.CLOSED){
             // Reads first byte in message
             int currentBit = input.read();
@@ -179,8 +194,20 @@ public class Websocket implements Runnable{
             e.printStackTrace();
         }
     }
-
-
 }
+
+/* KILDER
+
+https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_a_WebSocket_server_in_Java
+https://tools.ietf.org/html/rfc6455#section-5.5.2
+https://websockets.wordpress.com/the-lightweight-websockets-java-server/
+http://blog.honeybadger.io/building-a-simple-websockets-server-from-scratch-in-ruby/
+https://www.w3.org/TR/2011/WD-websockets-20110929/
+http://stackoverflow.com/questions/8125507/how-can-i-send-and-receive-websocket-messages-on-the-server-side
+http://codebeautify.org/string-binary-converter
+http://stackoverflow.com/questions/12310017/how-to-convert-a-byte-to-its-binary-string-representation
+https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers#Pings_and_Pongs_The_Heartbeat_of_WebSockets
+
+ */
 
 
