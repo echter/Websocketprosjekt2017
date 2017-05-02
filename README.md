@@ -13,6 +13,7 @@ cd Websocket\src\main\java
 javac Main.java
 java Main
 ```
+or run "Main" in IDE
 
 Then go to localhost:2346/index in browser
 
@@ -23,7 +24,9 @@ cd Websocket\src\main\java
 javac Main.java
 java Main
 ```
-Copy your own local file path to git directory Websocketprosjekt2017 + \Websocket\Index.html and paste into browser
+or run "Main" in IDE
+
+Then copy your own local file path to git directory Websocketprosjekt2017 + \Websocket\Index.html and paste into browser
 Ex: "C:\Users\EliasBrattli\Websocketprosjekt2017\Websocket\Index.html"
 
 # Run clients on two different computers
@@ -32,7 +35,7 @@ Computer 1:
 ```sh
 ipconfig
 ```
-Note Wifi LAN-adapter wifi: IPv4 Address (ex: 10.20.200.208)
+Note Wireless LAN-adapter wifi: IPv4 Address (ex: 10.20.200.208)
 
 Run server:
 ```sh
@@ -40,7 +43,13 @@ cd Websocket\src\main\java
 javac Main.java
 java Main
 ```
+or run "Main" in IDE
+
+Go to localhost:2346/index in browser
+You can also run multiple clients, by duplicating several tabs.
+
 Computer 2:
 
-Go to [IPv4 address from Computer 1]:2346/index in browser
+Go to [Wireless LAN-adapter Wifi: IPv4 address from Computer 1]:2346/index in browser
+
 Ex: 10.20.200.208:2346/index

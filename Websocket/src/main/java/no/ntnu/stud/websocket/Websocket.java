@@ -116,7 +116,11 @@ public class Websocket {
             //This tests the PING function, it should respons with a PONG function if successful
         }
     }
-
+    public void listen()throws IOException{
+        while (status != Status.CLOSED) {
+            onMessage();
+        }
+    }
 
     /**
      *  Handles messages between endpoints.
@@ -126,50 +130,48 @@ public class Websocket {
      */
     public void onMessage()throws IOException{
 
-        while (status != Status.CLOSED) {
-            // Reads first byte in message
-            try {
-                int currentBit = input.read();
-                //Normal text message
-                if (currentBit == OpCode.TEXTMESSAGE.getValue()) {
-                    currentBit = input.read();
-                    System.out.println("Length bit: " + currentBit);
-                    int length = currentBit - OVERFLOW_ADJUSTMENT;
+        // Reads first byte in message
+        try {
+            int currentBit = input.read();
+            //Normal text message
+            if (currentBit == OpCode.TEXTMESSAGE.getValue()) {
+                currentBit = input.read();
+                System.out.println("Length bit: " + currentBit);
+                int length = currentBit - OVERFLOW_ADJUSTMENT;
+                int[] decoded = decodeMessage(length);
+                if (decoded != null) {
+                    writeMessage(decoded, length, OpCode.TEXTMESSAGE.getValue());
+                }
+            } else if (currentBit == OpCode.CLOSE.getValue()) {
+                status = Status.CLOSING;
+                onClose();
+            } else if (currentBit == OpCode.PONG.getValue()) {
+                ping = false;
+                System.out.println("PONG RECIEVED");
+                currentBit = input.read();
+                int length = currentBit - OVERFLOW_ADJUSTMENT;
+                if (length > 0) {
+                    //System.out.println(length + " This is the length of the PONG message");
                     int[] decoded = decodeMessage(length);
-                    if (decoded != null) {
-                        writeMessage(decoded, length, OpCode.TEXTMESSAGE.getValue());
+                    String message = "";
+                    for (int decode : decoded) {
+                        message += (char) decode;
                     }
-                } else if (currentBit == OpCode.CLOSE.getValue()) {
-                    status = Status.CLOSING;
-                    onClose();
-                } else if (currentBit == OpCode.PONG.getValue()) {
-                    ping = false;
-                    System.out.println("PONG RECIEVED");
-                    currentBit = input.read();
-                    int length = currentBit - OVERFLOW_ADJUSTMENT;
-                    if (length > 0) {
-                        //System.out.println(length + " This is the length of the PONG message");
-                        int[] decoded = decodeMessage(length);
-                        String message = "";
-                        for (int decode : decoded) {
-                            message += (char) decode;
-                        }
-                        System.out.println(message);
-                    } else {
-                        for (int i = 0; i < KEY_LEN; i++) {
-                            input.read(); //this gets rid of the decryption keys that exist even when there is no message
-                        }
+                    System.out.println(message);
+                } else {
+                    for (int i = 0; i < KEY_LEN; i++) {
+                        input.read(); //this gets rid of the decryption keys that exist even when there is no message
                     }
                 }
-                /**
-                 * The catch gets invoked if the client is no longer sending anything,
-                 * this happens if the client loses internett or similar problems.
-                 * Any other kind of disconnect should be found out by the ping function.
-                 */
-            } catch (Exception e){
-                System.out.println("LOST CONNECTION... SOCKET CLOSING...");
-                socket.close();
             }
+            /**
+             * The catch gets invoked if the client is no longer sending anything,
+             * this happens if the client loses internett or similar problems.
+             * Any other kind of disconnect should be found out by the ping function.
+             */
+        } catch (Exception e){
+            System.out.println("LOST CONNECTION... SOCKET CLOSING...");
+            socket.close();
         }
         System.out.println("Completed");
     }

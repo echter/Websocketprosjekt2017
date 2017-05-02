@@ -20,7 +20,7 @@ public class Server implements WebsocketServer {
         try {
             System.out.println("Log to server. Waiting....");
             websocket.onOpen();
-            websocket.onMessage();
+            websocket.listen();
         }catch (Exception e){
             e.printStackTrace();
         }
