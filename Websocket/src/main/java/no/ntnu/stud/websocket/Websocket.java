@@ -52,7 +52,7 @@ public class Websocket implements Runnable{
             output.write(response, 0, response.length);
             status = Status.OPEN;
             System.out.println("Ok...");
-            onPing();
+            onPing("THIS IS A PING");
         }
     }
 
