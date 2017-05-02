@@ -65,7 +65,7 @@ public class Websocket {
         status = Status.CONNECTING;
         timer.schedule(myTask, 30000, 30000);
     }
-    
+
 
     /**
      * @throws IOException Because of InputStreams

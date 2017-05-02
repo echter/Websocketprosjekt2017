@@ -12,18 +12,29 @@ import com.sun.net.httpserver.HttpServer;
 
 public class Client {
     static String serverPortConcat = "";
+    private final String path = "/Index";
+    private int clientPort;
+    private int serverPort;
     public Client(int clientPort,int serverPort)throws IOException{
+        this.clientPort = clientPort;
+        this.serverPort = serverPort;
         serverPortConcat += serverPort;
         HttpServer server = HttpServer.create(new InetSocketAddress(clientPort), 0);
-        server.createContext("/test", new MyHandler());
+        server.createContext(path, new MyHandler());
         server.start();
     }
    static String getIpName(){
        return "localhost";
    }
-   static String getPort(){
-       return "2346";
+   public String getServerPortConcat(){
+       return serverPortConcat;
    }
+   public int getServerPort() {
+        return serverPort;
+    }
+    public int getClientPort(){
+       return clientPort;
+    }
    static String getIpv4Address() throws Exception {
         Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
         while (interfaces.hasMoreElements()) {
@@ -57,7 +68,6 @@ public class Client {
                         "    <!--script src=\"src/main/webapp/example.Client.js\"></script-->\n" +
                         "</head>\n" +
                         "<body>\n" +
-                        //"<script>var ws = new WebSocket(\"ws://" +getIpv4Address()+ ":2345\");\n" +
                         "<script>var ws = new WebSocket(\"ws://" +getIpv4Address()+ ":"+ serverPortConcat +"\");\n" +
                         "ws.onopen = function (event) {\n" +
                         "    //ws.send(\"abcdef\");\n" +
