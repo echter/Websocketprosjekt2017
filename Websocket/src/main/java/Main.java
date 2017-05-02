@@ -16,6 +16,8 @@ public class Main {
                 Socket socket = serverSocket.accept();
                 new Thread(new Websocket(socket)).start();
                 MultiThreadUtil.addSocket(socket);
+                for (Runnable t:MultiThreadUtil.getThreads()){
+                }
             }
         }catch (Exception e){
             e.printStackTrace();

@@ -8,6 +8,7 @@ import java.util.ArrayList;
  */
 public final class MultiThreadUtil {
     static ArrayList<Socket> sockets = new ArrayList<>();
+    static ArrayList<Runnable> threads = new ArrayList<>();
     private MultiThreadUtil(){}
     public static void addSocket(Socket socket){
         sockets.add(socket);
@@ -19,4 +20,8 @@ public final class MultiThreadUtil {
         return sockets.get(i);
     }
     public static boolean removeSocket(Socket socket) {return sockets.remove(socket);}
+
+    public static ArrayList<Runnable> getThreads() {
+        return threads;
+    }
 }
