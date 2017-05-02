@@ -31,6 +31,7 @@ public class Websocket {
     private final int OVERFLOW_ADJUSTMENT = 128;
     private final int KEY_LEN = 4;
     private boolean ping = false;
+    private Timer timer = new Timer();
 
     /**
      *
@@ -45,8 +46,7 @@ public class Websocket {
         timer.schedule(myTask, 5000, 5000);
     }
 
-    Timer timer = new Timer();
-    TimerTask myTask = new TimerTask() {
+    private TimerTask myTask = new TimerTask() {
         @Override
         public void run() {
             try {
