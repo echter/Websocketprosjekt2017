@@ -37,7 +37,7 @@ ipconfig
 ```
 Note Wireless LAN-adapter wifi: IPv4 Address (ex: 10.20.200.208)
 
-Run server:
+Run server and client:
 ```sh
 cd Websocket\src\main\java
 javac Main.java
@@ -53,3 +53,38 @@ Computer 2:
 Go to [Wireless LAN-adapter Wifi: IPv4 address from Computer 1]:2346/index in browser
 
 Ex: 10.20.200.208:2346/index
+
+# Example code
+Implement the WebsocketServer interface, which has a Websocket as class member.
+The example code below has a Server supporting multithreading.
+```sh
+public class Server implements WebsocketServer {
+    private Websocket websocket;
+    public Server(Websocket websocket){
+        this.websocket = websocket;
+    }
+    public Websocket getWebsocket(){
+        return websocket;
+    }
+    @Override
+    public void open()throws Exception{
+        websocket.onOpen();
+    }
+    @Override
+    public void listen()throws Exception{
+        websocket.listen();
+    }
+    @Override
+    public void run(){
+        try {
+            System.out.println("Log to server. Waiting....");
+            open();
+            listen();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+}
+```
+# Functions
+See javadoc [coming]
