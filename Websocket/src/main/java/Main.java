@@ -23,7 +23,6 @@ public class Main {
                 new Thread(server).start();
                 MultiThreadUtil.addSocket(socket);
             }
-
         }catch (Exception e){
             e.printStackTrace();
         }

@@ -116,8 +116,13 @@ public class Websocket {
             //This tests the PING function, it should respons with a PONG function if successful
         }
     }
+
+    /**
+     * Listens for messages between endpoints as long as status is open.
+     * @throws IOException Because of streams in onMessage
+     */
     public void listen()throws IOException{
-        while (status != Status.CLOSED) {
+        while (status == Status.OPEN) {
             onMessage();
         }
     }
@@ -129,7 +134,6 @@ public class Websocket {
      * @throws IOException The outputsteams may throw exception
      */
     public void onMessage()throws IOException{
-
         // Reads first byte in message
         try {
             int currentBit = input.read();
@@ -166,12 +170,13 @@ public class Websocket {
             }
             /**
              * The catch gets invoked if the client is no longer sending anything,
-             * this happens if the client loses internett or similar problems.
-             * Any other kind of disconnect should be found out by the ping function.
+             * this happens if the client loses internet connection or similar problems.
+             * Any other kind of disconnect should be discovered by the ping function.
              */
         } catch (Exception e){
             System.out.println("LOST CONNECTION... SOCKET CLOSING...");
             socket.close();
+            status = Status.CLOSED;
         }
         System.out.println("Completed");
     }
@@ -268,7 +273,9 @@ public class Websocket {
     }
 
     /**
-     *
+     * Heartbeat control frame.
+     * A ping is  meant to verify that the remote endpoint is still responsive.
+     * This ping may contain application data.
      * @param text The text contents of Websocket message
      * @throws IOException Because of streams
      */
@@ -278,12 +285,14 @@ public class Websocket {
             byte[] bytes = text.getBytes();
             writeMessage(bytes, bytes.length, OpCode.PING.getValue());
         } else {
-            System.out.println("PING TEXT CANT BE NULL");
+            System.out.println("PING TEXT CAN'T BE NULL");
         }
     }
 
     /**
      * Ping in case of empty application data
+     * Heartbeat control frame.
+     * A ping is  meant to verify that the remote endpoint is still responsive
      * @throws IOException
      */
     public void onPing() throws IOException {
@@ -295,6 +304,7 @@ public class Websocket {
     }
 
     /**
+     * Readystate is importan for control over when to stop recieving new messages.
      * @return the status of the Websocket (Connecting, Open, Closing, Closed)
      */
     public Status getStatus() {

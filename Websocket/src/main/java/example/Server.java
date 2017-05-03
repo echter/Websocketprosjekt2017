@@ -16,11 +16,23 @@ public class Server implements WebsocketServer {
         return websocket;
     }
     @Override
+    public void open()throws Exception{
+        websocket.onOpen();
+    }
+    @Override
+    public void listen()throws Exception{
+        websocket.listen();
+    }
+    @Override
+    public void close()throws Exception{
+        // Possible method in case of closing manually from outside
+    }
+    @Override
     public void run(){
         try {
             System.out.println("Log to server. Waiting....");
-            websocket.onOpen();
-            websocket.listen();
+            open();
+            listen();
         }catch (Exception e){
             e.printStackTrace();
         }
