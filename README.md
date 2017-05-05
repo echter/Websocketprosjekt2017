@@ -86,5 +86,9 @@ public class Server implements WebsocketServer {
     }
 }
 ```
-# Functions
-See javadoc [coming]
+# Javadoc
+To see javadoc, clone the repo and open apidocs/index.html in browser.
+```sh
+cd apidocs
+index.html
+```
