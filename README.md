@@ -93,7 +93,7 @@ To see javadoc, clone the repo and open apidocs/index.html in browser.
 cd apidocs
 index.html
 ```
-#External sources
+# External sources
 
 https://tools.ietf.org/html/rfc6455
 https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API
