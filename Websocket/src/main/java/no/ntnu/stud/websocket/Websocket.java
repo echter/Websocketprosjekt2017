@@ -100,7 +100,7 @@ public class Websocket {
              */
             String acceptKey = DatatypeConverter.printBase64Binary(MessageDigest.getInstance("SHA-1")
                     .digest((match.group(1) + MAGIC_STRING)
-                            .getBytes("UTF-8")));
+                    .getBytes("UTF-8")));
 
             String responseKey = "Sec-Websocket-Accept: " + acceptKey + "\r\n\r\n";
             System.out.println(acceptKey);
@@ -112,7 +112,6 @@ public class Websocket {
             //Status set to OPEN
             status = Status.OPEN;
             System.out.println("Ok...");
-
             //This tests the PING function, it should respons with a PONG function if successful
         }
     }

@@ -2,8 +2,9 @@
 Websocket project
 
 # Clone repo
+```sh
 git clone https://github.com/echter/Websocketprosjekt2017.git
-
+```
 # Run example Websocket server
 
 Alternative 1:
