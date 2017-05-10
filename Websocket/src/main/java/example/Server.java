@@ -17,7 +17,7 @@ public class Server implements WebsocketServer {
     }
     @Override
     public void open()throws Exception{
-        websocket.onOpen();
+        websocket.open();
     }
     @Override
     public void listen()throws Exception{

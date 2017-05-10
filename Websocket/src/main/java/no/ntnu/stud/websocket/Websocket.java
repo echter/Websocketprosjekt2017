@@ -38,12 +38,12 @@ public class Websocket {
             try {
                 System.out.println("SOCKET: " + socket + " STATUS " + status);
                 if (ping && Status.OPEN == status) {
-                    onClose();
+                    close();
                     System.out.println("CLOSED DUE TO UNRESPONSIVE PING");
                 } else if (!ping && Status.OPEN == status) {
                     LocalTime currentTime = LocalTime.now();
                     String message = "" + currentTime.getHour()+ ":" + currentTime.getMinute() + ":" + currentTime.getSecond() + "\n";
-                    onPing(message);
+                    ping(message);
                     ping = true;
                 }
             } catch (IOException e) {
@@ -77,7 +77,7 @@ public class Websocket {
      * @throws InterruptedException Because of digesting message
      * @throws NoSuchAlgorithmException Because of base64
      */
-    public void onOpen() throws IOException, InterruptedException, NoSuchAlgorithmException {
+    public void open() throws IOException, InterruptedException, NoSuchAlgorithmException {
         String dataIn = new Scanner(input, "UTF-8").useDelimiter("\\r\\n\\r\\n").next();
         System.out.println(dataIn);
         System.out.println("Incoming...");
@@ -123,7 +123,7 @@ public class Websocket {
             recieveFrame();
         }
     }
-    public void onMessage() throws IOException {
+    public void message() throws IOException {
         int currentBit = input.read();
         System.out.println("Length bit: " + currentBit);
         int length = currentBit - OVERFLOW_ADJUSTMENT;
@@ -144,10 +144,10 @@ public class Websocket {
             int currentBit = input.read();
             //Normal text message
             if (currentBit == OpCode.TEXTMESSAGE.getValue()) {
-               onMessage();
+               message();
             } else if (currentBit == OpCode.CLOSE.getValue()) {
                 status = Status.CLOSING;
-                onClose();
+                close();
             } else if (currentBit == OpCode.PONG.getValue()) {
                 ping = false;
                 System.out.println("PONG RECIEVED");
@@ -263,7 +263,7 @@ public class Websocket {
      * Closes every socket which is no longer active. Changes the readystate of this Websocket instance to closed
      * @throws IOException Because of socket tcp I/O operations
      */
-    public void onClose() throws IOException {
+    public void close() throws IOException {
         System.out.println("Closing socket: " + socket);
         if (MultiThreadUtil.removeSocket(socket)) {
             socket.close();
@@ -278,7 +278,7 @@ public class Websocket {
      * @param text The text contents of Websocket message
      * @throws IOException Because of streams
      */
-    public void onPing(String text) throws IOException {
+    public void ping(String text) throws IOException {
         System.out.println("PING SENT");
         if (text != null) {
             byte[] bytes = text.getBytes();
@@ -294,7 +294,7 @@ public class Websocket {
      * A ping is  meant to verify that the remote endpoint is still responsive
      * @throws IOException
      */
-    public void onPing() throws IOException {
+    public void ping() throws IOException {
         System.out.println("PING SENT");
         byte opCode = (byte) OpCode.PING.getValue();
         byte noText = (byte) 0b0000000;
