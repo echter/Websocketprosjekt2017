@@ -93,3 +93,14 @@ To see javadoc, clone the repo and open apidocs/index.html in browser.
 cd apidocs
 index.html
 ```
+#External sources
+
+https://tools.ietf.org/html/rfc6455
+https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API
+https://websockets.wordpress.com/the-lightweight-websockets-java-server/
+http://blog.honeybadger.io/building-a-simple-websockets-server-from-scratch-in-ruby/
+https://www.w3.org/TR/2011/WD-websockets-20110929/
+http://stackoverflow.com/questions/8125507/how-can-i-send-and-receive-websocket-messages-on-the-server-side
+http://codebeautify.org/string-binary-converter
+http://stackoverflow.com/questions/12310017/how-to-convert-a-byte-to-its-binary-string-representation
+https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API/Writing_WebSocket_servers#Pings_and_Pongs_The_Heartbeat_of_WebSockets
