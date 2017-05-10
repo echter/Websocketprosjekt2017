@@ -84,7 +84,7 @@ public class Client {
                         "}\n" +
                         "\n" +
                         "function sendMessage() {\n" +
-                        "    ws.send(\"This is a message\");\n" +
+                        "    ws.send(\"This is a message, but how long can it be?...................................................................................\");\n" +
                         "}\n" +
                         "function closeButtonFunction() {\n" +
                         "    ws.close();\n" +
