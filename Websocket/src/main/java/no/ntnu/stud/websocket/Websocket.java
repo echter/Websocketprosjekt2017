@@ -9,9 +9,7 @@ import java.io.*;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Date;
 import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -118,33 +116,35 @@ public class Websocket {
 
     /**
      * Listens for messages between endpoints as long as status is open.
-     * @throws IOException Because of streams in onMessage
+     * @throws IOException Because of streams in recieveFrame
      */
     public void listen()throws IOException{
         while (status == Status.OPEN) {
-            onMessage();
+            recieveFrame();
         }
     }
-
+    public void onMessage() throws IOException {
+        int currentBit = input.read();
+        System.out.println("Length bit: " + currentBit);
+        int length = currentBit - OVERFLOW_ADJUSTMENT;
+        int[] decoded = decodeMessage(length);
+        if (decoded != null) {
+            writeMessage(decoded, length, OpCode.TEXTMESSAGE.getValue());
+        }
+    }
     /**
      *  Handles messages between endpoints.
      *  Supports text frames, close frames, pong frames and empty frames.
      *  
      * @throws IOException The outputsteams may throw exception
      */
-    public void onMessage()throws IOException{
+    public void recieveFrame()throws IOException{
         // Reads first byte in message
         try {
             int currentBit = input.read();
             //Normal text message
             if (currentBit == OpCode.TEXTMESSAGE.getValue()) {
-                currentBit = input.read();
-                System.out.println("Length bit: " + currentBit);
-                int length = currentBit - OVERFLOW_ADJUSTMENT;
-                int[] decoded = decodeMessage(length);
-                if (decoded != null) {
-                    writeMessage(decoded, length, OpCode.TEXTMESSAGE.getValue());
-                }
+               onMessage();
             } else if (currentBit == OpCode.CLOSE.getValue()) {
                 status = Status.CLOSING;
                 onClose();

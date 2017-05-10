@@ -25,7 +25,7 @@ public class Server implements WebsocketServer {
     }
     @Override
     public void close()throws Exception{
-        // Possible method in case of closing manually from outside
+        // Possible method in case of closing manually
     }
     @Override
     public void run(){
